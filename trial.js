@@ -4,66 +4,80 @@ class Trial {
   this.next = nextHandler;
   }
 
-  press(key, num, duration){
-    this.myBody = document.getElementsByTagName("BODY")[0];
-    container.innerHTML = "Press the '" + key + "' key quickly to reveal award amounts. Start when you are ready.";
-    container.style.textAlign = "center";
-    var indicator = document.createElement("DIV");
-    indicator.id = "indicator";
+  press(key, num, duration, val1, val2){// MAKE THIS CALL DOUBLE AND USE THAT TO RETURN RESULT
+    var doPress = function(){
+      this.myBody = document.getElementsByTagName("BODY")[0];
+      container.innerHTML = "Press the '" + key + "' key quickly to reveal award amounts. Start when you are ready.";
+      container.style.textAlign = "center";
+      var indicator = document.createElement("DIV");
+      indicator.id = "indicator";
 
-    this.key = key;
-    this.duration = duration;
-    this.num = num;
-    this.presses = 0;
-    this.presser = this.pressed.bind(this);
-    this.indicator = indicator;
-    var _myself = this;
-    this.myBody.onkeyup = function(e){
-      _myself.pressed(e).bind(_myself);
+      this.val1 = val1;
+      this.val2 = val2;
+      this.key = key;
+      this.duration = duration;
+      this.num = num;
+      this.presses = 0;
+      this.presser = this.pressed.bind(this);
+      this.indicator = indicator;
+      var _myself = this;
+      this.myBody.onkeyup = function(e){
+        _myself.pressed(e);
+      }
+      container.appendChild(indicator);
     }
-    container.appendChild(indicator);
+    this.ret = [];
+    showMessage("Double: Press", "red", false, doPress);
+
   }
 
-  single(val, reveal, side){
-    container.innerHTML = "";
-    this.createClickArea(side, val, reveal);
-    this.addStart();
-    this.runTrial()
+  single(val, side, reveal = true){
+    var doSingle = function(){
+      container.innerHTML = "";
+      this.createClickArea(side, val, reveal);
+      this.addStart();
+      this.runTrial()
+    }
+    this.ret = [];
+    showMessage("Single", "blue", false, doSingle);
   }
 
-  double(val1, val2, reveal){
-    container.innerHTML = "";
-    this.createClickArea("left", val1, reveal);
-    this.createClickArea("right", val2, reveal);
-    this.addStart();
-    this.runTrial()
+  double(val1, val2, reveal = false){
+    this.ret = [];
+    var runDouble = function(){//FIX BORDER ON HOVER ISSUES, TEST PRESS
+      this.doDouble(val1, val2, reveal);
+    }
+    showMessage("Double: Blank", "gray", false, runDouble);
 
   }
 
 
   //-----------------------SUPPOSED TO BE PRIVATE-----------------------//
+  doDouble(val1, val2, reveal){
+    container.innerHTML = "";
+    this.createClickArea("left", val1, reveal);
+    this.createClickArea("right", val2, reveal);
+    this.addStart();
+    this.runTrial()
+  }
 
   endPress(){
     this.myBody.onkeyup = null;
     this.container.children[0].style.background =
       (this.presses >= this.num) ? "#0a0" : "#a00";
 
-    if(this.presses >= this.num){
-      this.container.children[0].style.background = "#0a0";
-    } else {
-
-    }
-    var ret = [this.presses, this.num];
-    setTimeout(function(){ this.next(ret);  }, 1500)
+    this.ret.push(this.presses, this.num);
+    setTimeout(function(){
+      this.doDouble(this.val1, this.val2, this.presses >= this.num)
+    }.bind(this), 1500)
 
   }
 
   pressed(e){
     if(e.key === this.key){
-      var _myself = this;
       this.indicator.style.background = "#888";
       if(this.presses === 0){
-        setTimeout(function(){_myself.endPress().bind(this)}, this.duration);
+        setTimeout(this.endPress.bind(this), this.duration);
       }
       this.presses += 1;
     }
@@ -76,11 +90,11 @@ class Trial {
     this.mtimes = [];
     this.choice = 0;
     this.timers = [];
-    this.startTime = Date.now();
     this.myBody = document.getElementsByTagName("BODY")[0];
   }
 
   startTrial(){
+    this.startTime = Date.now();
     this.start.style.cursor = "auto";
     var start = this.start;
     var timers = this.timers;
@@ -90,12 +104,15 @@ class Trial {
     //setupChoices();
     start.style.background='#27e800';
     document.onmousemove = function(e){
-      _myself.mouseDetect(e).bind(this);
-    };
+      this.mouseDetect(e);
+    }.bind(this);
 
     var clickareas = document.getElementsByClassName("clickarea");
     for(var i = 0; i < clickareas.length; i++){
       clickareas[i].style.borderColor = "black";
+      clickareas[i].onclick = function(e){
+        _myself.hitDetect(e);
+      };
     }
 
     timers.push(setTimeout(function(){ start.innerHTML = "4<br />Seconds" }, 1000));
@@ -103,7 +120,7 @@ class Trial {
     timers.push(setTimeout(function(){ start.innerHTML = "2<br />Seconds" }, 3000));
     timers.push(setTimeout(function(){ start.innerHTML = "1<br />Seconds" }, 4000));
     timers.push(setTimeout(function(){
-      _myself.finish().bind(_myself);
+      _myself.finish();
       document.getElementById("submitButton").style.display="none";
     }, 5000));
 
@@ -111,14 +128,9 @@ class Trial {
 
   createClickArea(gravity, cash, reveal){
     var div = document.createElement("DIV");
-    var _myself = this;
     div.className = "clickarea";
     div.cash = cash;
     div.style.float = gravity;
-    div.onclick = function(e){
-      _myself.hitDetect(e).bind(this);
-      console.log("detected");
-    };
 
     if(reveal){
       var rgb = "#0000" + (Math.round(255*cash)).toString(16);
@@ -143,7 +155,6 @@ class Trial {
     var y = e.clientY;
     var coor = "{" + x + "," + y + "}";
     this.mouse.push(coor);
-    console.log(coor)
     this.mtimes.push(Date.now() - this.startTime);
   }
 
@@ -151,24 +162,25 @@ class Trial {
 
     var x = event.target;
     this.choice = x.cash;
-
-    var clickareas = document.getElementsByClassName("clickarea");
-    for(var i = 0; i < clickareas.length; i++){
-      clickareas[i].onclick = null;
-    }
-
+    console.log("hit detected, cash is ", x.cash)
     this.finish();
   }
 
   finish(){
     document.onmousemove = null;
+    var clickareas = document.getElementsByClassName("clickarea");
+    for(var i = 0; i < clickareas.length; i++){
+      clickareas[i].onclick = null;
+    }
+
     this.start.innerHTML = "You won:<br />$" + this.choice;
 
     //document.getElementById("demo").innerHTML = document.getElementById("mturk_form").choicedata;
     for(var i = 0; i <  this.timers.length; i++){
       clearTimeout(this.timers[i]);
     }
-    var ret = [this.mtimes, this.mouse, this.choice];
+    var ret = this.ret;
+    ret.push(this.mtimes, this.mouse, this.choice);
     setTimeout(function(){ this.next(ret);  }, 3000) //runs next trial
 
   }

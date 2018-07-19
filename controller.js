@@ -4,22 +4,30 @@ var results = [];
 var count = 0;
 var pressResult = true;
 
-showStart();
-//pushTrial("press", "f", 11, 2000);
-pushTrial("double", 0.36, 0.74, true);
-pushTrial("single", 0.43, true, "left");
+showMessage("Get Ready! Press t to begin.", "white", true, startTrial);
+pushTrial("press", "f", 11, 2000, 0.82, 0.07);
+pushTrial("double", 0.36, 0.74);
+pushTrial("single", 0.43, "left");
 //startTrial();
 
 var nonTrialColor = 'rgb(120, 120, 120)';
 
-function showStart(){
+function showMessage(message, color, waitPress, callback){
   document.getElementsByTagName("BODY")[0].style.backgroundColor = 'rgb(90, 90, 90)';
-  container.innerHTML = '<div id="ready">Get Ready! Press t to begin.</div>'
+  container.innerHTML = '<div id="ready" style="color: ' + color + '"></div>'
   ready = document.getElementById("ready");
-  console.log(ready);
-  document.addEventListener("keypress", function(e){
-    if(e.key == "t") startTrial();
-  })//This is just not working
+  ready.innerText = message;
+  if(waitPress){
+    document.addEventListener("keypress", function(e){
+      if(e.key == "t"){
+        document.removeEventListener("keypress", arguments.callee);
+        callback.call(trial);
+      }
+
+    })
+  } else {
+      setTimeout(function(){callback.call(trial)}, 2000)
+  }
 }
 
 function pushTrial(){
@@ -31,16 +39,19 @@ function startTrial(){
     var info = trials.shift();
     switch(String(info[0])){
       case "double":
-        trial.double(info[1], info[2],
-        info.length > 3 ? info[3] :
-          (results[count-1][0][0] >= results[count-1][0][1])
-          );
+        trial.double(info[1], info[2], info.length > 3 ? info[3] : undefined);
         break;
       case "single":
-        trial.single(info[1], info[2], info[3]);
+        trial.single(info[1], info[2], info.length > 3 ? info[3] : undefined);
         break;
       case "press":
-        trial.press(info[1], info[2], info[3]);
+        trial.press(info[1], info[2], info[3], info[4], info[5]);
+        break;
+      case "break":
+        showMessage("Take a break. Press t to continue.", "white", true, function(){
+          count++;
+          startTrial();
+        })
         break;
     }
   } else {
