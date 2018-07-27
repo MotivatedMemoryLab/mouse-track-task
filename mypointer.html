@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <body>
+    <button id='element'>
+      Hello.
+    </button>
+    <img width="14px" height="14px" id='cursor' style='position: fixed; display: none;'  src='graphics\Circle.png' />
+    <script type="text/javascript">
+      var element = document.getElementById('element');
+      var cursor = document.getElementById('cursor');
+      var factor = 10;
+      var havePointerLock = 'pointerLockElement' in document ||
+          'mozPointerLockElement' in document ||
+          'webkitPointerLockElement' in document;
+
+      cursor.requestPointerLock = cursor.requestPointerLock ||
+  			     cursor.mozRequestPointerLock ||
+  			     cursor.webkitRequestPointerLock;
+      // Ask the browser to lock the pointer
+      element.onclick = cursor.requestPointerLock;
+
+      // Hook pointer lock state change events
+      document.addEventListener('pointerlockchange', changeCallback, false);
+      document.addEventListener('mozpointerlockchange', changeCallback, false);
+      document.addEventListener('webkitpointerlockchange', changeCallback, false);
+
+      function changeCallback(e){
+        if (document.pointerLockElement === element ||
+              document.mozPointerLockElement === element ||
+              document.webkitPointerLockElement === element) {
+            // Pointer was just locked
+            // Enable the mousemove listener
+            cursor.style.top = '50px';
+            cursor.style.left = '50px';
+            document.addEventListener("mousemove", moveCallback, false);
+        } else {
+            // Pointer was just unlocked
+            // Disable the mousemove listener
+            document.removeEventListener("mousemove", moveCallback, false);
+            this.unlockHook(this.element);
+        }
+      }
+
+      function moveCallback(e){
+        var movementX = e.movementX ||
+            e.mozMovementX          ||
+            e.webkitMovementX       ||
+            0,
+        movementY = e.movementY ||
+            e.mozMovementY      ||
+            e.webkitMovementY   ||
+            0;
+        cursor.style.display = 'inline';
+        if(movementX > 0){
+          var current = cursor.style.left;
+          var newleft = (parseFloat(current.substring(0 ,current.length-2)) + movementX/factor);
+          if(newleft < 2000){
+            cursor.style.left = newleft.toString() + "px";
+          }
+        } else if(movementX < 0){
+          var current = cursor.style.left;
+          var newleft = (parseFloat(current.substring(0 ,current.length-2)) + movementX/factor);
+          if(newleft > 0){
+            cursor.style.left = newleft.toString() + "px";
+          }
+        }
+
+        if(movementY > 0){
+          var current = cursor.style.top;
+          var newtop = (parseFloat(current.substring(0 ,current.length-2)) + movementY/factor);
+          if(newtop < 1000){
+            cursor.style.top = newtop.toString() + "px";
+          }
+        } else if(movementY < 0){
+          var current = cursor.style.top;
+          var newtop = (parseFloat(current.substring(0 ,current.length-2)) + movementY/factor);
+          if(newtop > 0){
+            cursor.style.top = newtop.toString() + "px";
+          }
+        }
+      }
+
+  // Ask the browser to release the pointer
+      document.exitPointerLock = document.exitPointerLock ||
+  			   document.mozExitPointerLock ||
+  			   document.webkitExitPointerLock;
+      document.exitPointerLock();
+    </script>
+  </body>
+</html>

@@ -2,6 +2,18 @@ class Trial {
   constructor(container, nextHandler){
   this.container = container;
   this.next = nextHandler;
+
+  container.requestPointerLock = container.requestPointerLock ||
+  			     container.mozRequestPointerLock ||
+  			     container.webkitRequestPointerLock;
+  // Ask the browser to lock the pointer
+  container.requestPointerLock();
+  if(document.pointerLockElement === container ||
+  document.mozPointerLockElement === container) {
+    console.log('The pointer lock status is now locked');
+} else {
+    console.log('The pointer lock status is now unlocked');
+}
   }
 
   press(key, num, duration, val1, val2){// MAKE THIS CALL DOUBLE AND USE THAT TO RETURN RESULT
