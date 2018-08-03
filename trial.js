@@ -134,9 +134,9 @@ class Trial {
     var clickareas = document.getElementsByClassName("clickarea");
     for(var i = 0; i < clickareas.length; i++){
       if(this.lockMouseOn(clickareas[i].getBoundingClientRect())){
-        clickareas[i].style.borderColor = "white";
+        clickareas[i].style.border = "medium solid white";
       } else {
-        clickareas[i].style.borderColor = clickareas[i].style.backgroundColor;
+        clickareas[i].style.border = "thin solid " + String(clickareas[i].style.backgroundColor);
       }
     }
   }
@@ -171,11 +171,12 @@ class Trial {
         cursor.style.display = 'inline';
 
         if(!this.started){
+          console.log('updating doc move');
           this.mover = this.moveCallback.bind(this);
           document.onmousemove = this.mover;
           this.started = true;
           this.startTrial.call(this);
-        }
+    }
       } else {
         // Pointer was just unlocked
         // Disable the mousemove listener

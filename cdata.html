@@ -14,9 +14,6 @@
           box-sizing: border-box;
           border: thin solid #333;
         }
-        .clickarea:hover {
-          border: medium solid white;
-        }
         #indicator {
           background:#fff;
           overflow:visible;
@@ -221,9 +218,9 @@
             var clickareas = document.getElementsByClassName("clickarea");
             for(var i = 0; i < clickareas.length; i++){
               if(this.lockMouseOn(clickareas[i].getBoundingClientRect())){
-                clickareas[i].style.borderColor = "white";
+                clickareas[i].style.border = "medium solid white";
               } else {
-                clickareas[i].style.borderColor = clickareas[i].style.backgroundColor;
+                clickareas[i].style.border = "thin solid " + String(clickareas[i].style.backgroundColor);
               }
             }
           }
@@ -258,11 +255,12 @@
                 cursor.style.display = 'inline';
 
                 if(!this.started){
+                  console.log('updating doc move');
                   this.mover = this.moveCallback.bind(this);
                   document.onmousemove = this.mover;
                   this.started = true;
                   this.startTrial.call(this);
-                }
+            }
               } else {
                 // Pointer was just unlocked
                 // Disable the mousemove listener
@@ -375,9 +373,7 @@
             var ret = this.ret;
             ret.push(this.mtimes, this.mouse, this.choice);
             setTimeout(function(){ this.next(ret);  }, 3000) //runs next trial
-
           }
-
         }
       </script>
       <script language='Javascript'>
@@ -392,8 +388,38 @@
             'webkitPointerLockElement' in document;
 
         if(havePointerLock){
-          showMessage("Get Ready! Press t to begin.", "white", true, startTrial);
-          //pushTrial("press", "f", 11, 2000, 0.82, 0.07);
+
+          var container = document.getElementById('container');
+
+          function firstTap(){
+
+            document.onpointerlockchange = document.onpointerlockchange ||
+                  document.onmozpointerlockchange ||
+                  document.onwebkitpointerlockchange;
+
+            document.onpointerlockchange = lockReceived;
+
+            container.requestPointerLock = container.requestPointerLock ||
+                   container.mozRequestPointerLock ||
+                   container.webkitRequestPointerLock;
+            container.requestPointerLock();
+          }
+
+          function lockReceived(){
+            if(document.pointerLockElement === container ||
+                  document.mozPointerLockElement === container ||
+                  document.webkitPointerLockElement === container) {
+
+                document.exitPointerLock = document.exitPointerLock ||
+                     document.mozExitPointerLock ||
+                     document.webkitExitPointerLock;
+                document.exitPointerLock();
+                startTrial();
+            }
+          }
+
+          showMessage("Get Ready! Press t and accept the cursor prompt to begin.", "white", true, firstTap);
+          pushTrial("press", "f", 11, 2000, 0.82, 0.07);
           pushTrial("double", 0.36, 0.74);
           pushTrial("single", 0.43, "left");
         } else {
@@ -464,7 +490,6 @@
           count++;
           startTrial();
         }
-
       </script>
       <script>
         //document.getElementById("mturk_form").cursordata = response[2];

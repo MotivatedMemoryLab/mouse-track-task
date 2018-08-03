@@ -8,19 +8,46 @@ var havePointerLock = 'pointerLockElement' in document ||
     'mozPointerLockElement' in document ||
     'webkitPointerLockElement' in document;
 
+
+
 if(havePointerLock){
-  showMessage("Get Ready! Press t to begin.", "white", true, startTrial);
-  //pushTrial("press", "f", 11, 2000, 0.82, 0.07);
+
+  var container = document.getElementById('container');
+
+  function firstTap(){
+
+    document.onpointerlockchange = document.onpointerlockchange ||
+          document.onmozpointerlockchange ||
+          document.onwebkitpointerlockchange;
+
+    document.onpointerlockchange = lockReceived;
+
+    container.requestPointerLock = container.requestPointerLock ||
+           container.mozRequestPointerLock ||
+           container.webkitRequestPointerLock;
+    container.requestPointerLock();
+  }
+
+  function lockReceived(){
+    if(document.pointerLockElement === container ||
+          document.mozPointerLockElement === container ||
+          document.webkitPointerLockElement === container) {
+
+        document.exitPointerLock = document.exitPointerLock ||
+             document.mozExitPointerLock ||
+             document.webkitExitPointerLock;
+        document.exitPointerLock();
+        startTrial();
+    }
+  }
+
+  showMessage("Get Ready! Press t and accept the cursor prompt to begin.", "white", true, firstTap);
+  pushTrial("press", "f", 11, 2000, 0.82, 0.07);
   pushTrial("double", 0.36, 0.74);
   pushTrial("single", 0.43, "left");
 } else {
   showMessage("Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
 }
-
-
-
-
-
 
 function showMessage(message, color, waitPress, callback){
   document.getElementsByTagName("BODY")[0].style.backgroundColor = 'rgb(90, 90, 90)';

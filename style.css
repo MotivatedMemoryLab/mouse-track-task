@@ -8,9 +8,6 @@
   box-sizing: border-box;
   border: thin solid #333;
 }
-.clickarea:hover {
-  border: medium solid white;
-}
 #indicator {
   background:#fff;
   overflow:visible;
