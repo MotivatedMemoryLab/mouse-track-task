@@ -1,19 +1,9 @@
 class Trial {
   constructor(container, nextHandler){
-  this.container = container;
-  this.next = nextHandler;
-
-  container.requestPointerLock = container.requestPointerLock ||
-  			     container.mozRequestPointerLock ||
-  			     container.webkitRequestPointerLock;
-  // Ask the browser to lock the pointer
-  container.requestPointerLock();
-  if(document.pointerLockElement === container ||
-  document.mozPointerLockElement === container) {
-    console.log('The pointer lock status is now locked');
-} else {
-    console.log('The pointer lock status is now unlocked');
-}
+    this.container = container;
+    this.next = nextHandler;
+    this.cursor = document.getElementById('cursor');
+    this.factor = 10;
   }
 
   press(key, num, duration, val1, val2){// MAKE THIS CALL DOUBLE AND USE THAT TO RETURN RESULT
@@ -51,12 +41,14 @@ class Trial {
       this.runTrial()
     }
     this.ret = [];
+    this.started = false;
     showMessage("Single", "blue", false, doSingle);
   }
 
   double(val1, val2, reveal = false){
     this.ret = [];
-    var runDouble = function(){//FIX BORDER ON HOVER ISSUES, TEST PRESS
+    this.started = false;
+    var runDouble = function(){
       this.doDouble(val1, val2, reveal);
     }
     showMessage("Double: Blank", "gray", false, runDouble);
@@ -74,7 +66,7 @@ class Trial {
   }
 
   endPress(){
-    this.myBody.onkeyup = null;
+    this.myBody.onkeyup = undefined;
     this.container.children[0].style.background =
       (this.presses >= this.num) ? "#0a0" : "#a00";
 
@@ -95,6 +87,121 @@ class Trial {
     }
   }
 
+  pix2num(pix){
+    return parseFloat(pix.substring(0, pix.length - 2));
+  }
+
+  moveCallback(e){
+    var cursor = this.cursor;
+    var factor = this.factor;
+
+    var movementX = e.movementX ||
+        e.mozMovementX          ||
+        e.webkitMovementX       ||
+        0,
+    movementY = e.movementY ||
+        e.mozMovementY      ||
+        e.webkitMovementY   ||
+        0;
+
+    var pix2num = this.pix2num;
+    this.mouseRecord(pix2num(cursor.style.left), pix2num(cursor.style.top));
+
+    if(movementX > 0){
+      var newleft = pix2num(cursor.style.left) + movementX/factor;
+      if(newleft < 1920){
+        cursor.style.left = newleft.toString() + "px";
+      }
+    } else if(movementX < 0){
+      var newleft = pix2num(cursor.style.left) + movementX/factor;
+      if(newleft > 0){
+        cursor.style.left = newleft.toString() + "px";
+      }
+    }
+
+    if(movementY > 0){
+      var newtop = pix2num(cursor.style.top) + movementY/factor;
+      if(newtop < 1000){
+        cursor.style.top = newtop.toString() + "px";
+      }
+    } else if(movementY < 0){
+      var newtop = pix2num(cursor.style.top) + movementY/factor;
+      if(newtop > 0){
+        cursor.style.top = newtop.toString() + "px";
+      }
+    }
+
+    var clickareas = document.getElementsByClassName("clickarea");
+    for(var i = 0; i < clickareas.length; i++){
+      if(this.lockMouseOn(clickareas[i].getBoundingClientRect())){
+        clickareas[i].style.borderColor = "white";
+      } else {
+        clickareas[i].style.borderColor = clickareas[i].style.backgroundColor;
+      }
+    }
+  }
+
+  lockMouseOn(bb){
+    var cursor = this.cursor;
+    var x = this.pix2num(cursor.style.left) + cursor.width/2;
+    var y = this.pix2num(cursor.style.top) + cursor.height/2;
+
+    return x >= bb.left && x <= bb.right && y >= bb.top && y <= bb.bottom;
+  }
+
+  checkClicks(){
+    var clickareas = document.getElementsByClassName("clickarea");
+    for(var i = 0; i < clickareas.length; i++){
+      if(this.lockMouseOn(clickareas[i].getBoundingClientRect())){
+        this.hitDetect.call(this, clickareas[i]);
+      }
+    }
+  }
+
+
+
+  changeCallback(e){
+    var cursor = this.cursor;
+    if (document.pointerLockElement === cursor ||
+          document.mozPointerLockElement === cursor ||
+          document.webkitPointerLockElement === cursor) {
+        // Pointer was just locked
+        // Enable the mousemove listener
+
+        cursor.style.display = 'inline';
+
+        if(!this.started){
+          this.mover = this.moveCallback.bind(this);
+          document.onmousemove = this.mover;
+          this.started = true;
+          this.startTrial.call(this);
+        }
+      } else {
+        // Pointer was just unlocked
+        // Disable the mousemove listener
+        document.onmousemove = undefined;
+        cursor.style.display = 'none';
+
+        document.onclick = undefined;
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   runTrial(){
     //this.ptimes = [];
@@ -103,6 +210,12 @@ class Trial {
     this.choice = 0;
     this.timers = [];
     this.myBody = document.getElementsByTagName("BODY")[0];
+    var lock = this.changeCallback.bind(this);
+    document.onpointerlockchange = document.onpointerlockchange ||
+          document.onmozpointerlockchange ||
+          document.onwebkitpointerlockchange;
+
+    document.onpointerlockchange = lock;
   }
 
   startTrial(){
@@ -111,21 +224,11 @@ class Trial {
     var start = this.start;
     var timers = this.timers;
     var _myself = this;
-    start.removeEventListener("click", this.starter);
-    start.innerHTML = "5<br />Seconds"
-    //setupChoices();
+    start.onclick = undefined;
+    start.innerHTML = "5<br />Seconds";
     start.style.background='#27e800';
-    document.onmousemove = function(e){
-      this.mouseDetect(e);
-    }.bind(this);
 
-    var clickareas = document.getElementsByClassName("clickarea");
-    for(var i = 0; i < clickareas.length; i++){
-      clickareas[i].style.borderColor = "black";
-      clickareas[i].onclick = function(e){
-        _myself.hitDetect(e);
-      };
-    }
+    document.onclick = this.checkClicks.bind(this);
 
     timers.push(setTimeout(function(){ start.innerHTML = "4<br />Seconds" }, 1000));
     timers.push(setTimeout(function(){ start.innerHTML = "3<br />Seconds" }, 2000));
@@ -148,7 +251,7 @@ class Trial {
       var rgb = "#0000" + (Math.round(255*cash)).toString(16);
       div.style.background = rgb;
     }
-    div.style.borderColor = div.style.background;
+    div.style.borderColor = div.style.backgroundColor;
     this.container.appendChild(div);
   }
 
@@ -156,33 +259,41 @@ class Trial {
     var start = document.createElement("DIV");
     start.id = "startarea";
     start.innerHTML = "Click here to start.";
-    this.starter = this.startTrial.bind(this);
-    start.addEventListener("click", this.starter);
+    var cursor = this.cursor;
+    cursor.requestPointerLock = cursor.requestPointerLock ||
+           cursor.mozRequestPointerLock ||
+           cursor.webkitRequestPointerLock;
+    start.onclick = function(e){
+      cursor.style.left = String(e.clientX) + 'px';
+      cursor.style.top = String(e.clientY) + 'px';
+      cursor.requestPointerLock();
+    }
+
     container.appendChild(start);
     this.start = start;
+
   }
 
-  mouseDetect(e){
-    var x = e.clientX;
-    var y = e.clientY;
+  mouseRecord(x, y){
     var coor = "{" + x + "," + y + "}";
     this.mouse.push(coor);
     this.mtimes.push(Date.now() - this.startTime);
   }
 
-  hitDetect(event) {
-
-    var x = event.target;
-    this.choice = x.cash;
-    console.log("hit detected, cash is ", x.cash)
+  hitDetect(target) {
+    this.choice = target.cash;
     this.finish();
   }
 
   finish(){
-    document.onmousemove = null;
+    document.onmousemove = undefined;
+    document.exitPointerLock = document.exitPointerLock ||
+         document.mozExitPointerLock ||
+         document.webkitExitPointerLock;
+    document.exitPointerLock();
     var clickareas = document.getElementsByClassName("clickarea");
     for(var i = 0; i < clickareas.length; i++){
-      clickareas[i].onclick = null;
+      clickareas[i].onclick = undefined;
     }
 
     this.start.innerHTML = "You won:<br />$" + this.choice;

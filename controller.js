@@ -4,16 +4,22 @@ var results = [];
 var count = 0;
 var pressResult = true;
 
-showMessage("Get Ready! Press t to begin.", "white", true, startTrial);
-pushTrial("press", "f", 11, 2000, 0.82, 0.07);
-pushTrial("double", 0.36, 0.74);
-pushTrial("single", 0.43, "left");
-//startTrial();
 var havePointerLock = 'pointerLockElement' in document ||
     'mozPointerLockElement' in document ||
     'webkitPointerLockElement' in document;
 
-console.log(havePointerLock)
+if(havePointerLock){
+  showMessage("Get Ready! Press t to begin.", "white", true, startTrial);
+  //pushTrial("press", "f", 11, 2000, 0.82, 0.07);
+  pushTrial("double", 0.36, 0.74);
+  pushTrial("single", 0.43, "left");
+} else {
+  showMessage("Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
+}
+
+
+
+
 
 
 function showMessage(message, color, waitPress, callback){
@@ -60,12 +66,16 @@ function startTrial(){
     }
   } else {
     console.log("Done!");
+    /*document.exitPointerLock = document.exitPointerLock ||
+         document.mozExitPointerLock ||
+         document.webkitExitPointerLock;
+    document.exitPointerLock();*/
     var container = document.getElementById("container");
     //document.getElementById("submitButton").style.display="inherit";
     container.innerHTML = "";
     for(var i = 0; i < results.length; i++){
       var args = Array.prototype.slice.call(results[i]);
-      container.innerHTML += (args + "<br />");
+      container.innerHTML += (args + "<br /><br />");
     }
     container.innerHTML += "<br />";
   }

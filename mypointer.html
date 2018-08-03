@@ -1,11 +1,32 @@
 <!doctype html>
 <html>
-  <body>
+  <head>
+    <style>
+      #square {
+        color: white;
+        -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+/Edge */
+        user-select: none; /* Standard */
+        position: relative;
+        top: 300px;
+        left: 50%;
+        background: rgb(0, 170, 0);
+        height: 100px;
+        width: 100px;
+      }
+    </style>
+  </head>
+  <body style='height: 1000px'>
     <button id='element'>
       Hello.
     </button>
+    <div id='square'>
+      Click me!
+    </div>
     <img width="14px" height="14px" id='cursor' style='position: fixed; display: none;'  src='graphics\Circle.png' />
     <script type="text/javascript">
+      var square = document.getElementById('square');
       var element = document.getElementById('element');
       var cursor = document.getElementById('cursor');
       var factor = 10;
@@ -16,8 +37,36 @@
       cursor.requestPointerLock = cursor.requestPointerLock ||
   			     cursor.mozRequestPointerLock ||
   			     cursor.webkitRequestPointerLock;
+
+      cursor.style.top = '50px';
+      cursor.style.left = '50px';
       // Ask the browser to lock the pointer
       element.onclick = cursor.requestPointerLock;
+
+      function squareswitch(){
+          if(square.style.backgroundColor == 'rgb(0, 0, 170)'){
+            square.style.backgroundColor = 'rgb(170, 0, 0)';
+          } else {
+            square.style.backgroundColor = 'rgb(0, 0, 170)';
+          }
+      }
+
+      function pix2num(pix){
+        return parseFloat(pix.substring(0, pix.length - 2));
+      }
+
+      function lockclick(bb){
+        var x = pix2num(cursor.style.left) + cursor.width/2;
+        var y = pix2num(cursor.style.top) + cursor.height/2;
+
+        if (x >= bb.left && x <= bb.right && y >= bb.top && y <= bb.bottom) {
+          square.onclick.call(square);
+        }
+
+      }
+
+      square.onclick = squareswitch;
+
 
       // Hook pointer lock state change events
       document.addEventListener('pointerlockchange', changeCallback, false);
@@ -25,19 +74,26 @@
       document.addEventListener('webkitpointerlockchange', changeCallback, false);
 
       function changeCallback(e){
+
         if (document.pointerLockElement === element ||
               document.mozPointerLockElement === element ||
               document.webkitPointerLockElement === element) {
             // Pointer was just locked
             // Enable the mousemove listener
-            cursor.style.top = '50px';
-            cursor.style.left = '50px';
             document.addEventListener("mousemove", moveCallback, false);
-        } else {
+            cursor.style.display = 'inline';
+
+            if(document.onclick == undefined){
+              var lockedclick = lockclick.bind(this, square.getBoundingClientRect());
+              document.onclick = lockedclick;
+            }
+          } else {
             // Pointer was just unlocked
             // Disable the mousemove listener
             document.removeEventListener("mousemove", moveCallback, false);
-            this.unlockHook(this.element);
+            cursor.style.display = 'hidden';
+
+            document.onclick = undefined;
         }
       }
 
@@ -50,30 +106,26 @@
             e.mozMovementY      ||
             e.webkitMovementY   ||
             0;
-        cursor.style.display = 'inline';
+
         if(movementX > 0){
-          var current = cursor.style.left;
-          var newleft = (parseFloat(current.substring(0 ,current.length-2)) + movementX/factor);
-          if(newleft < 2000){
+          var newleft = pix2num(cursor.style.left) + movementX/factor;
+          if(newleft < 1920){
             cursor.style.left = newleft.toString() + "px";
           }
         } else if(movementX < 0){
-          var current = cursor.style.left;
-          var newleft = (parseFloat(current.substring(0 ,current.length-2)) + movementX/factor);
+          var newleft = pix2num(cursor.style.left) + movementX/factor;
           if(newleft > 0){
             cursor.style.left = newleft.toString() + "px";
           }
         }
 
         if(movementY > 0){
-          var current = cursor.style.top;
-          var newtop = (parseFloat(current.substring(0 ,current.length-2)) + movementY/factor);
+          var newtop = pix2num(cursor.style.top) + movementY/factor;
           if(newtop < 1000){
             cursor.style.top = newtop.toString() + "px";
           }
         } else if(movementY < 0){
-          var current = cursor.style.top;
-          var newtop = (parseFloat(current.substring(0 ,current.length-2)) + movementY/factor);
+          var newtop = pix2num(cursor.style.top) + movementY/factor;
           if(newtop > 0){
             cursor.style.top = newtop.toString() + "px";
           }

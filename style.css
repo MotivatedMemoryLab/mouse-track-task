@@ -1,12 +1,12 @@
 .clickarea {
-  background:#333;
+  background-color:#333;
   overflow:visible;
   width:100px;
   height:90px;
   text-align: center;
   padding-top: 10px;
   box-sizing: border-box;
-  border: thin solid gray;
+  border: thin solid #333;
 }
 .clickarea:hover {
   border: medium solid white;
