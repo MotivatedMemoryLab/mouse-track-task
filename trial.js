@@ -186,23 +186,6 @@ class Trial {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   runTrial(){
     //this.ptimes = [];
     this.mouse = [];
