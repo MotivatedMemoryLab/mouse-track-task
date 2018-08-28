@@ -41,10 +41,12 @@ if(havePointerLock){
     }
   }
 
-  showMessage("Get Ready! Press t and accept the cursor prompt to begin.", "white", true, firstTap);
-  pushTrial("press", "f", 11, 2000, 0.82, 0.07);
+  showMessage("Get Ready! This is a practice run. Press t and read the cursor prompt to begin.", "white", true, firstTap);
+
   pushTrial("double", 0.36, 0.74);
+  pushTrial("press", "f", 11, 2000, 0.82, 0.07);
   pushTrial("single", 0.43, "left");
+
 } else {
   showMessage("Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
 }

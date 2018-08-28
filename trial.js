@@ -171,11 +171,11 @@ class Trial {
         cursor.style.display = 'inline';
 
         if(!this.started){
-          console.log('updating doc move');
           this.mover = this.moveCallback.bind(this);
           document.onmousemove = this.mover;
           this.started = true;
           this.startTrial.call(this);
+
     }
       } else {
         // Pointer was just unlocked
@@ -270,6 +270,7 @@ class Trial {
   }
 
   finish(){
+    this.started = false;
     document.onmousemove = undefined;
     document.exitPointerLock = document.exitPointerLock ||
          document.mozExitPointerLock ||
