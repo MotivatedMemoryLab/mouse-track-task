@@ -1,0 +1,5 @@
+.psiturk_history
+
+*.pyc
+*.log
+*.db
