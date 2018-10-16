@@ -41,115 +41,148 @@ var instructionPages = [ // add as a list as many pages as you like
 *
 ********************/
 
-/********************
-* STROOP TEST       *
-********************/
-var StroopExperiment = function() {
+var Mousetrack = function() {
+    var trial = new Trial(document.getElementById('container'), next);
+    var trials = [];
 
-	var wordon, // time word is presented
-	    listening = false;
+    var havePointerLock = 'pointerLockElement' in document ||
+        'mozPointerLockElement' in document ||
+        'webkitPointerLockElement' in document;
 
-	// Stimuli for a basic Stroop experiment
-	var stims = [
-			["SHIP", "red", "unrelated"],
-			["MONKEY", "green", "unrelated"],
-			["ZAMBONI", "blue", "unrelated"],
-			["RED", "red", "congruent"],
-			["GREEN", "green", "congruent"],
-			["BLUE", "blue", "congruent"],
-			["GREEN", "red", "incongruent"],
-			["BLUE", "green", "incongruent"],
-			["RED", "blue", "incongruent"]
-		];
 
-	stims = _.shuffle(stims);
+    if(havePointerLock){
 
-	var next = function() {
-		if (stims.length===0) {
-			finish();
-		}
-		else {
-			stim = stims.shift();
-			show_word( stim[0], stim[1] );
-			wordon = new Date().getTime();
-			listening = true;
-			d3.select("#query").html('<p id="prompt">Type "R" for Red, "B" for blue, "G" for green.</p>');
-		}
-	};
-	
-	var response_handler = function(e) {
-		if (!listening) return;
+        var container = document.getElementById('container');
 
-		var keyCode = e.keyCode,
-			response;
+        function firstTap(){
 
-		switch (keyCode) {
-			case 82:
-				// "R"
-				response="red";
-				break;
-			case 71:
-				// "G"
-				response="green";
-				break;
-			case 66:
-				// "B"
-				response="blue";
-				break;
-			default:
-				response = "";
-				break;
-		}
-		if (response.length>0) {
-			listening = false;
-			var hit = response == stim[1];
-			var rt = new Date().getTime() - wordon;
+            document.onpointerlockchange = document.onpointerlockchange ||
+                document.onmozpointerlockchange ||
+                document.onwebkitpointerlockchange;
 
-			psiTurk.recordTrialData({'phase':"TEST",
-                                     'word':stim[0],
-                                     'color':stim[1],
-                                     'relation':stim[2],
-                                     'response':response,
-                                     'hit':hit,
-                                     'rt':rt}
-                                   );
-			remove_word();
-			next();
-		}
-	};
+            document.onpointerlockchange = lockReceived;
 
-	var finish = function() {
-	    $("body").unbind("keydown", response_handler); // Unbind keys
-	    currentview = new Questionnaire();
-	};
-	
-	var show_word = function(text, color) {
-		d3.select("#stim")
-			.append("div")
-			.attr("id","word")
-			.style("color",color)
-			.style("text-align","center")
-			.style("font-size","150px")
-			.style("font-weight","400")
-			.style("margin","20px")
-			.text(text);
-	};
+            container.requestPointerLock = container.requestPointerLock ||
+                container.mozRequestPointerLock ||
+                container.webkitRequestPointerLock;
+            container.requestPointerLock();
+        }
 
-	var remove_word = function() {
-		d3.select("#word").remove();
-	};
+        function lockReceived(){
+            if(document.pointerLockElement === container ||
+                document.mozPointerLockElement === container ||
+                document.webkitPointerLockElement === container) {
 
-	
-	// Load the stage.html snippet into the body of the page
-	psiTurk.showPage('stage.html');
+                document.exitPointerLock = document.exitPointerLock ||
+                    document.mozExitPointerLock ||
+                    document.webkitExitPointerLock;
+                document.exitPointerLock();
+                startTrial();
+            }
+        }
 
-	// Register the response handler that is defined above to handle any
-	// key down events.
-	$("body").focus().keydown(response_handler); 
+        showMessage("Get Ready! This is a practice run. Press t and read the cursor prompt to begin.", "white", true, firstTap);
 
-	// Start the test
-	next();
-};
+        pushTrial("double", 0.36, 0.74);
+        pushTrial("press", "f", 11, 2000, 0.82, 0.07);
+        pushTrial("single", 0.43, "left");
+
+    } else {
+        showMessage("Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
+    }
+
+    function showMessage(message, color, waitPress, callback){
+        document.getElementsByTagName("BODY")[0].style.backgroundColor = 'rgb(90, 90, 90)';
+        container.innerHTML = '<div id="ready" style="color: ' + color + '"></div>'
+        ready = document.getElementById("ready");
+        ready.innerText = message;
+        if(waitPress){
+            document.addEventListener("keypress", function(e){
+                if(e.key == "t"){
+                    document.removeEventListener("keypress", arguments.callee);
+                    callback.call(trial);
+                }
+
+            })
+        } else {
+            setTimeout(function(){callback.call(trial)}, 2000)
+        }
+    }
+
+    function pushTrial(){
+        trials.push(arguments);
+    }
+
+    function startTrial(){
+        if(trials.length > 0){
+            var info = trials.shift();
+            switch(String(info[0])){
+                case "double":
+                    trial.double(info[1], info[2], info.length > 3 ? info[3] : undefined);
+                    break;
+                case "single":
+                    trial.single(info[1], info[2], info.length > 3 ? info[3] : undefined);
+                    break;
+                case "press":
+                    trial.press(info[1], info[2], info[3], info[4], info[5]);
+                    break;
+                case "break":
+                    showMessage("Take a break. Press t to continue.", "white", true, function(){
+                        startTrial();
+                    })
+                    break;
+            }
+        } else {
+            console.log("Done!");
+
+            var container = document.getElementById("container");
+            container.innerHTML = "";
+        }
+    }
+
+    function next(){
+
+        switch(arguments[0]){
+            case "press":
+                psiTurk.recordTrialData({'trial':"press",
+                    'num':arguments[1],
+                    'duration':arguments[2],
+                    'val1':arguments[3],
+                    'val2':arguments[4],
+                    'presses':arguments[5]
+                    }
+                );
+                break;
+            case "double":
+                psiTurk.recordTrialData({'trial':"double",
+                        'val1':arguments[1],
+                        'val2':arguments[2],
+                        'reveal':arguments[3],
+                        'mtimes':arguments[4],
+                        'mouse':arguments[5],
+                        'choice':arguments[6],
+                    }
+                );
+                break;
+            case "single":
+                psiTurk.recordTrialData({'trial':"single",
+                        'value':arguments[1],
+                        'side':arguments[2],
+                        'reveal':arguments[3],
+                        'mtimes':arguments[4],
+                        'mouse':arguments[5],
+                        'choice':arguments[6],
+                    }
+                );
+                break;
+        }
+
+        startTrial();
+    }
+
+    // Load the stage.html snippet into the body of the page
+    psiTurk.showPage('stage.html');
+}
 
 
 /****************
@@ -222,6 +255,6 @@ var currentview;
 $(window).load( function(){
     psiTurk.doInstructions(
     	instructionPages, // a list of pages you want to display in sequence
-    	function() { currentview = new StroopExperiment(); } // what you want to do when you are done with instructions
+    	function() { currentview = new Mousetrack(); } // what you want to do when you are done with instructions
     );
 });

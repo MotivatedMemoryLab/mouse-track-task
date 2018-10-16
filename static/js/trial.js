@@ -6,7 +6,7 @@ class Trial {
     this.factor = 10;
   }
 
-  press(key, num, duration, val1, val2){// MAKE THIS CALL DOUBLE AND USE THAT TO RETURN RESULT
+  press(key, num, duration, val1, val2){
     var doPress = function(){
       this.myBody = document.getElementsByTagName("BODY")[0];
       container.innerHTML = "Press the '" + key + "' key quickly to reveal award amounts. Start when you are ready.";
@@ -28,7 +28,7 @@ class Trial {
       }
       container.appendChild(indicator);
     }
-    this.ret = [];
+    this.ret = ["press", num, duration, val1, val2];
     showMessage("Double: Press", "red", false, doPress);
 
   }
@@ -40,13 +40,13 @@ class Trial {
       this.addStart();
       this.runTrial()
     }
-    this.ret = [];
+    this.ret = ["single", value, side, reveal];
     this.started = false;
     showMessage("Single", "blue", false, doSingle);
   }
 
   double(val1, val2, reveal = false){
-    this.ret = [];
+    this.ret = ["double", val1, val2, reveal];
     this.started = false;
     var runDouble = function(){
       this.doDouble(val1, val2, reveal);
