@@ -6,6 +6,8 @@ class Trial {
     this.factor = 10;
   }
 
+
+
   press(key, num, duration, val1, val2){
     var doPress = function(){
       this.myBody = document.getElementsByTagName("BODY")[0];
@@ -25,11 +27,11 @@ class Trial {
       var _myself = this;
       this.myBody.onkeyup = function(e){
         _myself.pressed(e);
-      }
+      };
       container.appendChild(indicator);
-    }
+    };
     this.ret = ["press", num, duration, val1, val2];
-    showMessage("Double: Press", "red", false, doPress);
+    showMessage(this, "Double: Press", "red", false, doPress);
 
   }
 
@@ -39,10 +41,10 @@ class Trial {
       this.createClickArea(side, val, reveal);
       this.addStart();
       this.runTrial()
-    }
-    this.ret = ["single", value, side, reveal];
+    };
+    this.ret = ["single", val, side, reveal];
     this.started = false;
-    showMessage("Single", "blue", false, doSingle);
+    showMessage(this, "Single", "blue", false, doSingle);
   }
 
   double(val1, val2, reveal = false){
@@ -51,7 +53,7 @@ class Trial {
     var runDouble = function(){
       this.doDouble(val1, val2, reveal);
     }
-    showMessage("Double: Blank", "gray", false, runDouble);
+    showMessage(this, "Double: Blank", "gray", false, runDouble);
 
   }
 
@@ -78,6 +80,9 @@ class Trial {
   }
 
   pressed(e){
+    if (this.key === "spacebar"){
+      this.key = " ";
+    }
     if(e.key === this.key){
       this.indicator.style.background = "#888";
       if(this.presses === 0){
@@ -289,7 +294,9 @@ class Trial {
     }
     var ret = this.ret;
     ret.push(this.mtimes, this.mouse, this.choice);
-    setTimeout(function(){ this.next(ret);  }, 3000) //runs next trial
+    console.log(this);
+    console.log(this.next);
+    setTimeout(function(){ this.next(ret);  }.bind(this), 3000) //runs next trial
 
   }
 

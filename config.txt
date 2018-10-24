@@ -1,36 +1,29 @@
 [HIT Configuration]
-title = Stroop task
-description = Judge the color of a series of words.
-amt_keywords = Perception, Psychology
+title = Mousetrack Task
+description = Choose from multiple rewards via mouse.
+amt_keywords = Choice, Psychology, Motivation
 lifetime = 24
 us_only = true
 approve_requirement = 95
-contact_email_on_error = youremail@gmail.com
-ad_group = Default psiTurk Stroop Example
-psiturk_keywords = stroop
-organization_name = New Great University
+contact_email_on_error = adcocklab@gmail.com
+ad_group = Mousetrack
+psiturk_keywords = mousetrack
+organization_name = Duke University
 browser_exclude_rule = MSIE, mobile, tablet
-allow_repeats = false
+allow_repeats = true
 
 [Database Parameters]
 database_url = sqlite:///participants.db
-table_name = turkdemo
+table_name = mousetrack
 
 [Server Parameters]
-host = localhost
-port = 22362
+host = 0.0.0.0
+port = 31411
 cutoff_time = 30
 logfile = server.log
 loglevel = 2
 debug = true
-login_username = examplename
-login_pw = examplepassword
 threads = auto
-secret_key = 'this is my secret key which is hard to guess, i should change this'
-#certfile = <path_to.crt> 
-#keyfile = <path_to.key>
-#adserver_revproxy_host = www.location.of.your.revproxy.sans.protocol.com
-#adserver_revproxy_port = 80 # defaults to 80
 
 [Task Parameters]
 experiment_code_version = 1.0
@@ -44,5 +37,5 @@ launch_in_sandbox_mode = true
 #
 #   https://<host>:<port>/ad 
 
-use_psiturk_ad_server = true
-ad_location = false
+use_psiturk_ad_server = false
+ad_location = https://web-mir.ccn.duke.edu:31410/ad

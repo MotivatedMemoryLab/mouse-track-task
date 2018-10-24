@@ -42,6 +42,9 @@ var instructionPages = [ // add as a list as many pages as you like
 ********************/
 
 var Mousetrack = function() {
+    // Load the stage.html snippet into the body of the page
+    psiTurk.showPage('stage.html');
+
     var trial = new Trial(document.getElementById('container'), next);
     var trials = [];
 
@@ -81,33 +84,17 @@ var Mousetrack = function() {
             }
         }
 
-        showMessage("Get Ready! This is a practice run. Press t and read the cursor prompt to begin.", "white", true, firstTap);
+        showMessage(trial, "Get Ready! This is a practice run. Press t and read the cursor prompt to begin.", "white", true, firstTap);
 
         pushTrial("double", 0.36, 0.74);
-        pushTrial("press", "f", 11, 2000, 0.82, 0.07);
+        pushTrial("press", "spacebar", 11, 2000, 0.82, 0.07);
         pushTrial("single", 0.43, "left");
 
     } else {
-        showMessage("Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
+        showMessage(trial, "Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
     }
 
-    function showMessage(message, color, waitPress, callback){
-        document.getElementsByTagName("BODY")[0].style.backgroundColor = 'rgb(90, 90, 90)';
-        container.innerHTML = '<div id="ready" style="color: ' + color + '"></div>'
-        ready = document.getElementById("ready");
-        ready.innerText = message;
-        if(waitPress){
-            document.addEventListener("keypress", function(e){
-                if(e.key == "t"){
-                    document.removeEventListener("keypress", arguments.callee);
-                    callback.call(trial);
-                }
 
-            })
-        } else {
-            setTimeout(function(){callback.call(trial)}, 2000)
-        }
-    }
 
     function pushTrial(){
         trials.push(arguments);
@@ -127,7 +114,7 @@ var Mousetrack = function() {
                     trial.press(info[1], info[2], info[3], info[4], info[5]);
                     break;
                 case "break":
-                    showMessage("Take a break. Press t to continue.", "white", true, function(){
+                    showMessage(trial, "Take a break. Press t to continue.", "white", true, function(){
                         startTrial();
                     })
                     break;
@@ -135,8 +122,8 @@ var Mousetrack = function() {
         } else {
             console.log("Done!");
 
-            var container = document.getElementById("container");
-            container.innerHTML = "";
+            document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
+            currentview = new Questionnaire();
         }
     }
 
@@ -179,9 +166,6 @@ var Mousetrack = function() {
 
         startTrial();
     }
-
-    // Load the stage.html snippet into the body of the page
-    psiTurk.showPage('stage.html');
 }
 
 
