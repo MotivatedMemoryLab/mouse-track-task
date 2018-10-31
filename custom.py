@@ -10,6 +10,7 @@ from psiturk.experiment_errors import ExperimentError, InvalidUsage
 from psiturk.user_utils import PsiTurkAuthorization, nocache
 
 # # Database setup
+import _mysql
 from psiturk.db import db_session, init_db
 from psiturk.models import Participant
 from json import dumps, loads

@@ -1,5 +1,11 @@
 .psiturk_history
 
+# This is the real config file with password information that is not being committed to git.
+# If you want to use the committed config file, please rename it to config.txt and edit as needed.
+config.txt
+
 *.pyc
 *.log
 *.db
+*.iml
+*.idea

@@ -1,0 +1,54 @@
+.clickarea {
+  background-color:#333;
+  overflow:visible;
+  width:100px;
+  height:90px;
+  text-align: center;
+  padding-top: 10px;
+  box-sizing: border-box;
+  border: thin solid #333;
+}
+#indicator {
+  background:#fff;
+  overflow:visible;
+  width:100px;
+  height:90px;
+  text-align: center;
+  padding-top: 10px;
+  margin: 50px auto;
+}
+#ready {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20pt;
+  color: white;
+  font-family: sans-serif;
+}
+#startarea {
+  text-align: center;
+  position: fixed;
+  bottom: 0%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: auto;
+  margin-bottom: 5px;
+  padding: 5px;
+  background-color:#77f;
+  width:100px;
+  cursor: pointer;
+}
+#submitButton {
+  position: fixed;
+  top: 0%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: auto;
+  margin-top: 50px;
+  display: none;
+}
+#press, #trial{
+  text-align: center;
+  font-size: 48px;
+}

@@ -41,115 +41,139 @@ var instructionPages = [ // add as a list as many pages as you like
 *
 ********************/
 
-/********************
-* STROOP TEST       *
-********************/
-var StroopExperiment = function() {
+var Mousetrack = function() {
+    // Load the stage.html snippet into the body of the page
+    psiTurk.showPage('stage.html');
 
-	var wordon, // time word is presented
-	    listening = false;
+    window.moveTo(0, 0);
+    window.resizeTo(screen.width, screen.height);
 
-	// Stimuli for a basic Stroop experiment
-	var stims = [
-			["SHIP", "red", "unrelated"],
-			["MONKEY", "green", "unrelated"],
-			["ZAMBONI", "blue", "unrelated"],
-			["RED", "red", "congruent"],
-			["GREEN", "green", "congruent"],
-			["BLUE", "blue", "congruent"],
-			["GREEN", "red", "incongruent"],
-			["BLUE", "green", "incongruent"],
-			["RED", "blue", "incongruent"]
-		];
+    $(window).resize(function(){
+        window.resizeTo(screen.width, screen.height);
+    });
 
-	stims = _.shuffle(stims);
+    var trial = new Trial(document.getElementById('container'), next);
+    var trials = [];
 
-	var next = function() {
-		if (stims.length===0) {
-			finish();
-		}
-		else {
-			stim = stims.shift();
-			show_word( stim[0], stim[1] );
-			wordon = new Date().getTime();
-			listening = true;
-			d3.select("#query").html('<p id="prompt">Type "R" for Red, "B" for blue, "G" for green.</p>');
-		}
-	};
-	
-	var response_handler = function(e) {
-		if (!listening) return;
+    var havePointerLock = 'pointerLockElement' in document ||
+        'mozPointerLockElement' in document ||
+        'webkitPointerLockElement' in document;
 
-		var keyCode = e.keyCode,
-			response;
 
-		switch (keyCode) {
-			case 82:
-				// "R"
-				response="red";
-				break;
-			case 71:
-				// "G"
-				response="green";
-				break;
-			case 66:
-				// "B"
-				response="blue";
-				break;
-			default:
-				response = "";
-				break;
-		}
-		if (response.length>0) {
-			listening = false;
-			var hit = response == stim[1];
-			var rt = new Date().getTime() - wordon;
+    if(havePointerLock){
 
-			psiTurk.recordTrialData({'phase':"TEST",
-                                     'word':stim[0],
-                                     'color':stim[1],
-                                     'relation':stim[2],
-                                     'response':response,
-                                     'hit':hit,
-                                     'rt':rt}
-                                   );
-			remove_word();
-			next();
-		}
-	};
+        var container = document.getElementById('container');
 
-	var finish = function() {
-	    $("body").unbind("keydown", response_handler); // Unbind keys
-	    currentview = new Questionnaire();
-	};
-	
-	var show_word = function(text, color) {
-		d3.select("#stim")
-			.append("div")
-			.attr("id","word")
-			.style("color",color)
-			.style("text-align","center")
-			.style("font-size","150px")
-			.style("font-weight","400")
-			.style("margin","20px")
-			.text(text);
-	};
+        function firstTap(){
 
-	var remove_word = function() {
-		d3.select("#word").remove();
-	};
+            document.onpointerlockchange = document.onpointerlockchange ||
+                document.onmozpointerlockchange ||
+                document.onwebkitpointerlockchange;
 
-	
-	// Load the stage.html snippet into the body of the page
-	psiTurk.showPage('stage.html');
+            document.onpointerlockchange = lockReceived;
 
-	// Register the response handler that is defined above to handle any
-	// key down events.
-	$("body").focus().keydown(response_handler); 
+            container.requestPointerLock = container.requestPointerLock ||
+                container.mozRequestPointerLock ||
+                container.webkitRequestPointerLock;
+            container.requestPointerLock();
+        }
 
-	// Start the test
-	next();
-};
+        function lockReceived(){
+            if(document.pointerLockElement === container ||
+                document.mozPointerLockElement === container ||
+                document.webkitPointerLockElement === container) {
+
+                document.exitPointerLock = document.exitPointerLock ||
+                    document.mozExitPointerLock ||
+                    document.webkitExitPointerLock;
+                document.exitPointerLock();
+                startTrial();
+            }
+        }
+
+        showMessage(trial, "Get Ready! This is a practice run. Do not resize or exit this window until you are done. Press t and read the cursor prompt to begin.", "white", true, firstTap);
+
+        pushTrial("double", 0.36, 0.74);
+        pushTrial("press", "spacebar", 11, 2000, 0.82, 0.07);
+        pushTrial("single", 0.43, "left");
+
+    } else {
+        showMessage(trial, "Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
+    }
+
+
+
+    function pushTrial(){
+        trials.push(arguments);
+    }
+
+    function startTrial(){
+        if(trials.length > 0){
+            var info = trials.shift();
+            switch(String(info[0])){
+                case "double":
+                    trial.double(info[1], info[2], info.length > 3 ? info[3] : undefined);
+                    break;
+                case "single":
+                    trial.single(info[1], info[2], info.length > 3 ? info[3] : undefined);
+                    break;
+                case "press":
+                    trial.press(info[1], info[2], info[3], info[4], info[5]);
+                    break;
+                case "break":
+                    showMessage(trial, "Take a break. Press t to continue.", "white", true, function(){
+                        startTrial();
+                    })
+                    break;
+            }
+        } else {
+            console.log("Done!");
+
+            document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
+            currentview = new Questionnaire();
+        }
+    }
+
+    function next(){
+
+        switch(arguments[0]){
+            case "press":
+                psiTurk.recordTrialData({'trial':"press",
+                    'num':arguments[1],
+                    'duration':arguments[2],
+                    'val1':arguments[3],
+                    'val2':arguments[4],
+                    'presses':arguments[5]
+                    }
+                );
+                break;
+            case "double":
+                psiTurk.recordTrialData({'trial':"double",
+                        'val1':arguments[1],
+                        'val2':arguments[2],
+                        'reveal':arguments[3],
+                        'mtimes':arguments[4],
+                        'mouse':arguments[5],
+                        'choice':arguments[6],
+                    }
+                );
+                break;
+            case "single":
+                psiTurk.recordTrialData({'trial':"single",
+                        'value':arguments[1],
+                        'side':arguments[2],
+                        'reveal':arguments[3],
+                        'mtimes':arguments[4],
+                        'mouse':arguments[5],
+                        'choice':arguments[6],
+                    }
+                );
+                break;
+        }
+
+        startTrial();
+    }
+}
 
 
 /****************
@@ -222,6 +246,6 @@ var currentview;
 $(window).load( function(){
     psiTurk.doInstructions(
     	instructionPages, // a list of pages you want to display in sequence
-    	function() { currentview = new StroopExperiment(); } // what you want to do when you are done with instructions
+    	function() { currentview = new Mousetrack(); } // what you want to do when you are done with instructions
     );
 });
