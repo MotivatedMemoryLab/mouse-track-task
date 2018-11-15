@@ -14,6 +14,7 @@ if [ -r util/dbcreds ]; then
 
 	sed -i "s|^port = .*|port = $port|" $config
 
+	sed -i "s|/ad|/$port/ad|" $config
 else
 	echo "You need to have a dbcreds file in the util directory."
 fi

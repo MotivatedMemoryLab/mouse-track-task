@@ -1,5 +1,5 @@
 if screen -list | grep -q exp; then     # run bash script
-	screen -S exp -p 0 -X stuff "./end_server.sh$(echo -ne '\r')"
+	screen -S exp -p 0 -X stuff "util/end_server.sh$(echo -ne '\r')"
 	echo "Exiting Psiturk Server..."
 fi
 
