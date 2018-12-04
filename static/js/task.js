@@ -41,7 +41,7 @@ var instructionPages = [ // add as a list as many pages as you like
 *
 ********************/
 
-var Mousetrack = function() {
+var Mousetrack = function(rewards) {
     // Load the stage.html snippet into the body of the page
     psiTurk.showPage('stage.html');
 
@@ -93,12 +93,86 @@ var Mousetrack = function() {
 
         showMessage(trial, "Get Ready! This is a practice run. Do not resize or exit this window until you are done. Press t and read the cursor prompt to begin.", "white", true, firstTap);
 
-        pushTrial("double", 0.36, 0.74);
-        pushTrial("press", "spacebar", 11, 2000, 0.82, 0.07);
-        pushTrial("single", 0.43, "left");
+        calculate_trials(4, 4, 4, 4, 8);
+
+        // pushTrial("double", 0.36, 0.74);
+        // pushTrial("press", "spacebar", 11, 2000, 0.82, 0.07);
+        // pushTrial("single", 0.43, "left");
 
     } else {
         showMessage(trial, "Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
+    }
+
+    function calculate_trials(num_press, num_left_solo, num_right_solo, num_guess, break_threshold){
+        var arr = [];
+        var expand = function(data, frequency){
+            var ret = [];
+            for(var i = 0; i < frequency; i++){
+                ret.push(data);
+            }
+            return ret
+        }
+        const press_row = 15;
+        const left_solo_row = 16;
+        const right_solo_row = 17;
+        const guess_row = 18;
+
+        arr.push.apply(arr, expand(press_row, num_press));
+        arr.push.apply(arr, expand(left_solo_row, num_left_solo));
+        arr.push.apply(arr, expand(right_solo_row, num_right_solo));
+        arr.push.apply(arr, expand(guess_row, num_guess));
+        arr = _.shuffle(arr);
+        for(var i = break_threshold; i < arr.length; i+= break_threshold){
+        }
+
+        // Press Trial Params
+        const key = "spacebar";
+        const time = 2000;
+
+        const label_left_dual = 1;
+        const label_right_dual = 2;
+        const label_left_solo = 3;
+        const label_right_solo = 4;
+        const label_left_dual_guess = 5;
+        const label_right_dual_guess = 6;
+
+        var tick_press = 0;
+        var tick_left_solo = 0;
+        var tick_right_solo = 0;
+        var tick_guess = 0;
+
+        function randi(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        rewards = rewards.split("\n").map(function(row){return row.split(",");});
+
+        for(var j = 0; j < arr.length; j++){
+            switch (arr[j]){
+                case press_row:
+                    pushTrial("press", key, randi(7, 12), time, rewards[label_left_dual][tick_press], rewards[label_right_dual][tick_press]);
+                    tick_press += 1;
+                    break;
+
+                case left_solo_row:
+                    pushTrial("single", rewards[label_left_solo][tick_left_solo], "left");
+                    tick_left_solo += 1;
+                    break;
+
+                case right_solo_row:
+                    pushTrial("single", rewards[label_right_solo][tick_right_solo], "right");
+                    tick_right_solo += 1;
+                    break;
+
+                case guess_row:
+                    pushTrial("double", rewards[label_left_dual_guess][tick_guess], rewards[label_right_dual_guess][tick_guess]);
+                    tick_guess += 1;
+                    break;
+            }
+        }
+
     }
 
 
@@ -123,7 +197,7 @@ var Mousetrack = function() {
                 case "break":
                     showMessage(trial, "Take a break. Press t to continue.", "white", true, function(){
                         startTrial();
-                    })
+                    });
                     break;
             }
         } else {
@@ -243,9 +317,28 @@ var currentview;
 /*******************
  * Run Task
  ******************/
-$(window).load( function(){
-    psiTurk.doInstructions(
-    	instructionPages, // a list of pages you want to display in sequence
-    	function() { currentview = new Mousetrack(); } // what you want to do when you are done with instructions
-    );
+
+$(document).ready(function() {
+    $.ajax({
+        type: "GET",
+        url: "static/resources/chances.csv",
+        dataType: "text",
+        success: function(data) {
+            load(data);
+        },
+        error: function(req, status, error){
+            $("body").html("<p>" + error + "</p>");
+        }
+    });
 });
+
+var load = function(data) {
+    $(window).load(function () {
+        psiTurk.doInstructions(
+            instructionPages, // a list of pages you want to display in sequence
+            function () {
+                currentview = new Mousetrack(data);
+            } // what you want to do when you are done with instructions
+        );
+    });
+};

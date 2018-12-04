@@ -286,7 +286,7 @@ class Trial {
       clickareas[i].onclick = undefined;
     }
 
-    this.start.innerHTML = "You won:<br />$" + this.choice;
+    this.start.innerHTML = "You won:<br />$" + parseFloat(this.choice).toFixed(2);
 
     //document.getElementById("demo").innerHTML = document.getElementById("mturk_form").choicedata;
     for(var i = 0; i <  this.timers.length; i++){
