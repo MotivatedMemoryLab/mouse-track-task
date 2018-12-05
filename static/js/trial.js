@@ -38,8 +38,8 @@ class Trial {
   single(val, side, reveal = true){
     var doSingle = function(){
       container.innerHTML = "";
-      this.createClickArea(side, val, reveal);
-      this.addStart();
+      this.createClickArea(side, val, reveal, "single");
+      //this.addStart();
       this.runTrial()
     };
     this.ret = ["single", val, side, reveal];
@@ -51,7 +51,7 @@ class Trial {
     this.ret = ["double", val1, val2, reveal];
     this.started = false;
     var runDouble = function(){
-      this.doDouble(val1, val2, reveal);
+      this.doDouble(val1, val2, reveal, "guess");
     }
     showMessage(this, "Double: Blank", "gray", false, runDouble);
 
@@ -59,11 +59,11 @@ class Trial {
 
 
   //-----------------------SUPPOSED TO BE PRIVATE-----------------------//
-  doDouble(val1, val2, reveal){
+  doDouble(val1, val2, reveal, type){
     container.innerHTML = "";
-    this.createClickArea("left", val1, reveal);
-    this.createClickArea("right", val2, reveal);
-    this.addStart();
+    this.createClickArea("left", val1, reveal, type);
+    this.createClickArea("right", val2, reveal, type);
+    //this.addStart();
     this.runTrial()
   }
 
@@ -74,7 +74,7 @@ class Trial {
 
     this.ret.push(this.presses, this.num);
     setTimeout(function(){
-      this.doDouble(this.val1, this.val2, this.presses >= this.num)
+      this.doDouble(this.val1, this.val2, this.presses >= this.num, "double")
     }.bind(this), 1500)
 
   }
@@ -199,30 +199,49 @@ class Trial {
     this.choice = 0;
     this.timers = [];
     this.myBody = document.getElementsByTagName("BODY")[0];
+
+    var cursor = this.cursor;
+    cursor.requestPointerLock = cursor.requestPointerLock ||
+        cursor.mozRequestPointerLock ||
+        cursor.webkitRequestPointerLock;
+
+
     var lock = this.changeCallback.bind(this);
     document.onpointerlockchange = document.onpointerlockchange ||
           document.onmozpointerlockchange ||
           document.onwebkitpointerlockchange;
 
     document.onpointerlockchange = lock;
+
+
+    cursor.style.left = String(window.innerWidth / 2) + 'px';
+    cursor.style.top = String(window.innerHeight - 20) + 'px';
+    cursor.style.display = 'inline';
+    //document.exitPointerLock();
+    cursor.requestPointerLock(); // Just in case the user cancelled it or something...
   }
 
   startTrial(){
     this.startTime = Date.now();
-    this.start.style.cursor = "auto";
-    var start = this.start;
+    //this.start.style.cursor = "auto";
     var timers = this.timers;
     var _myself = this;
+
+    /*
+    var start = this.start;
     start.onclick = undefined;
     start.innerHTML = "5<br />Seconds";
     start.style.background='#27e800';
+    */
 
     document.onclick = this.checkClicks.bind(this);
 
+    /*
     timers.push(setTimeout(function(){ start.innerHTML = "4<br />Seconds" }, 1000));
     timers.push(setTimeout(function(){ start.innerHTML = "3<br />Seconds" }, 2000));
     timers.push(setTimeout(function(){ start.innerHTML = "2<br />Seconds" }, 3000));
     timers.push(setTimeout(function(){ start.innerHTML = "1<br />Seconds" }, 4000));
+    */
     timers.push(setTimeout(function(){
       _myself.finish();
       document.getElementById("submitButton").style.display="none";
@@ -230,14 +249,17 @@ class Trial {
 
   }
 
-  createClickArea(gravity, cash, reveal){
+  createClickArea(gravity, cash, reveal, type){
     var div = document.createElement("DIV");
     div.className = "clickarea";
     div.cash = cash;
     div.style.float = gravity;
 
     if(reveal){
-      var rgb = "#0000" + (Math.round(255*cash)).toString(16);
+      if(type === "double")
+        var rgb = "#" + (Math.round(255*cash)).toString(16) + "0000";
+      else
+        var rgb = "#0000" + (Math.round(255*cash)).toString(16);
       div.style.background = rgb;
     }
     div.style.borderColor = div.style.backgroundColor;
@@ -277,16 +299,19 @@ class Trial {
   finish(){
     this.started = false;
     document.onmousemove = undefined;
+    this.cursor.style.display = "none";
+    /*
     document.exitPointerLock = document.exitPointerLock ||
          document.mozExitPointerLock ||
          document.webkitExitPointerLock;
     document.exitPointerLock();
+    */
     var clickareas = document.getElementsByClassName("clickarea");
     for(var i = 0; i < clickareas.length; i++){
       clickareas[i].onclick = undefined;
     }
 
-    this.start.innerHTML = "You won:<br />$" + parseFloat(this.choice).toFixed(2);
+    //this.start.innerHTML = "You won:<br />$" + parseFloat(this.choice).toFixed(2);
 
     //document.getElementById("demo").innerHTML = document.getElementById("mturk_form").choicedata;
     for(var i = 0; i <  this.timers.length; i++){
@@ -294,9 +319,10 @@ class Trial {
     }
     var ret = this.ret;
     ret.push(this.mtimes, this.mouse, this.choice);
-    console.log(this);
-    console.log(this.next);
-    setTimeout(function(){ this.next(ret);  }.bind(this), 3000) //runs next trial
+
+    showMessage(this, "You won: $" + parseFloat(this.choice).toFixed(2), "white", false,
+        function(){ this.next(ret);  }.bind(this), 3000);
+    //setTimeout(function(){ this.next(ret);  }.bind(this), 3000) //runs next trial
 
   }
 

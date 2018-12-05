@@ -47,10 +47,11 @@ var Mousetrack = function(rewards) {
 
     window.moveTo(0, 0);
     window.resizeTo(screen.width, screen.height);
-
+    /*
     $(window).resize(function(){
         window.resizeTo(screen.width, screen.height);
     });
+    */
 
     var trial = new Trial(document.getElementById('container'), next);
     var trials = [];
@@ -62,7 +63,7 @@ var Mousetrack = function(rewards) {
 
     if(havePointerLock){
 
-        var container = document.getElementById('container');
+        var cursor = document.getElementById('cursor');
 
         function firstTap(){
 
@@ -72,16 +73,16 @@ var Mousetrack = function(rewards) {
 
             document.onpointerlockchange = lockReceived;
 
-            container.requestPointerLock = container.requestPointerLock ||
-                container.mozRequestPointerLock ||
-                container.webkitRequestPointerLock;
-            container.requestPointerLock();
+            cursor.requestPointerLock = cursor.requestPointerLock ||
+                cursor.mozRequestPointerLock ||
+                cursor.webkitRequestPointerLock;
+            cursor.requestPointerLock();
         }
 
         function lockReceived(){
-            if(document.pointerLockElement === container ||
-                document.mozPointerLockElement === container ||
-                document.webkitPointerLockElement === container) {
+            if(document.pointerLockElement === cursor ||
+                document.mozPointerLockElement === cursor ||
+                document.webkitPointerLockElement === cursor) {
 
                 document.exitPointerLock = document.exitPointerLock ||
                     document.mozExitPointerLock ||

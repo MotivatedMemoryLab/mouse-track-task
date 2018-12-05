@@ -23,6 +23,7 @@ function showMessage(trial, message, color, waitPress, callback){
     document.getElementsByTagName("BODY")[0].style.backgroundColor = 'rgb(90, 90, 90)';
     container.innerHTML = '<div id="ready" style="color: ' + color + '"></div>';
     var ready = document.getElementById("ready");
+    ready.style.fontSize = "30px";
     ready.innerText = message;
     if(waitPress){
         document.addEventListener("keypress", function(e){
