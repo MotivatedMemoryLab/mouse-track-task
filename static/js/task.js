@@ -80,6 +80,7 @@ var Mousetrack = function(rewards) {
         }
 
         function lockReceived(){
+            console.log("lock changed");
             if(document.pointerLockElement === cursor ||
                 document.mozPointerLockElement === cursor ||
                 document.webkitPointerLockElement === cursor) {
@@ -87,7 +88,7 @@ var Mousetrack = function(rewards) {
                 document.exitPointerLock = document.exitPointerLock ||
                     document.mozExitPointerLock ||
                     document.webkitExitPointerLock;
-                document.exitPointerLock();
+                //document.exitPointerLock();
                 startTrial();
             }
         }
@@ -319,7 +320,7 @@ var currentview;
  * Run Task
  ******************/
 
-$(document).ready(function() {
+/*$(document).ready(function() {
     $.ajax({
         type: "GET",
         url: "static/resources/chances.csv",
@@ -331,9 +332,9 @@ $(document).ready(function() {
             $("body").html("<p>" + error + "</p>");
         }
     });
-});
+});*/
 
-var load = function(data) {
+/*var load = function(data) {
     $(window).load(function () {
         psiTurk.doInstructions(
             instructionPages, // a list of pages you want to display in sequence
@@ -342,4 +343,27 @@ var load = function(data) {
             } // what you want to do when you are done with instructions
         );
     });
-};
+};*/
+
+$(window).load( function(){
+    psiTurk.doInstructions(
+        instructionPages, // a list of pages you want to display in sequence
+        function() {
+            $(document).ready(function () {
+                $.ajax({
+                    type: "GET",
+                    url: "static/resources/chances.csv",
+                    dataType: "text",
+                    success: function (data) {
+                        currentview = new Mousetrack(data);  // what you want to do when you are done with instructions
+                    },
+                    error: function (req, status, error) {
+                        $("body").html("<p>" + error + "</p>");
+                    }
+                });
+            });
+
+        }
+
+    );
+});

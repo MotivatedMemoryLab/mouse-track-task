@@ -1,5 +1,5 @@
 .clickarea {
-  background-color:#333;
+  background-color:#5a5a5a;
   overflow:visible;
   width:100px;
   height:90px;
@@ -26,7 +26,7 @@
   color: white;
   font-family: sans-serif;
 }
-#startarea {
+#startarea { /* This is no longer displayed */
   text-align: center;
   position: fixed;
   bottom: 0%;
@@ -39,7 +39,7 @@
   width:100px;
   cursor: pointer;
 }
-#submitButton {
+#submitButton { /* This is no longer displayed */
   position: fixed;
   top: 0%;
   left: 50%;

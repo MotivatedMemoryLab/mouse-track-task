@@ -26,13 +26,14 @@ function showMessage(trial, message, color, waitPress, callback){
     ready.style.fontSize = "30px";
     ready.innerText = message;
     if(waitPress){
-        document.addEventListener("keypress", function(e){
+        var pressed = function(e){
             if(e.key === "t"){
-                document.removeEventListener("keypress", arguments.callee);
+                document.onkeypress = undefined;
                 callback.call(trial);
             }
 
-        })
+        }
+        document.onkeypress = pressed;
     } else {
         setTimeout(function(){callback.call(trial)}, 2000)
     }

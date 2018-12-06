@@ -7,6 +7,20 @@ body {
     font-size: 13pt;
 }
 
+#container {
+    -webkit-user-select: none;
+    -moz-user-select: -moz-none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#cursor {
+    -webkit-user-select: none;
+    -moz-user-select: -moz-none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 
 /* text styling */
 strong {

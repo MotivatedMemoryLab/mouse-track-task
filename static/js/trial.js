@@ -14,6 +14,7 @@ class Trial {
       container.innerHTML = "Press the '" + key + "' key quickly to reveal award amounts. Start when you are ready.";
       container.style.textAlign = "center";
       var indicator = document.createElement("DIV");
+      indicator.style.visibility = "hidden";
       indicator.id = "indicator";
 
       this.val1 = val1;
@@ -244,7 +245,7 @@ class Trial {
     */
     timers.push(setTimeout(function(){
       _myself.finish();
-      document.getElementById("submitButton").style.display="none";
+      //document.getElementById("submitButton").style.display="none";
     }, 5000));
 
   }
