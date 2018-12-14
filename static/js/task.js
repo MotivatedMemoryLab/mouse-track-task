@@ -80,7 +80,6 @@ var Mousetrack = function(rewards) {
         }
 
         function lockReceived(){
-            console.log("lock changed");
             if(document.pointerLockElement === cursor ||
                 document.mozPointerLockElement === cursor ||
                 document.webkitPointerLockElement === cursor) {
@@ -89,6 +88,19 @@ var Mousetrack = function(rewards) {
                     document.mozExitPointerLock ||
                     document.webkitExitPointerLock;
                 //document.exitPointerLock();
+
+                var startExp = document.getElementById("start-exp");
+                startExp.style.visibility = "visible";
+                startExp.onclick = function(){
+                    var bb = startExp.getBoundingClientRect();
+                    var cursor = this.cursor;
+                    var x = this.pix2num(cursor.style.left) + cursor.width/2;
+                    var y = this.pix2num(cursor.style.top) + cursor.height/2;
+
+                    if (x >= bb.left && x <= bb.right && y >= bb.top && y <= bb.bottom){
+                        startTrial();
+                    }
+                };
                 startTrial();
             }
         }
@@ -118,6 +130,7 @@ var Mousetrack = function(rewards) {
         const left_solo_row = 16;
         const right_solo_row = 17;
         const guess_row = 18;
+        const break_trial = -1;
 
         arr.push.apply(arr, expand(press_row, num_press));
         arr.push.apply(arr, expand(left_solo_row, num_left_solo));
@@ -125,6 +138,7 @@ var Mousetrack = function(rewards) {
         arr.push.apply(arr, expand(guess_row, num_guess));
         arr = _.shuffle(arr);
         for(var i = break_threshold; i < arr.length; i+= break_threshold){
+            arr.splice(i, 0, break_trial);
         }
 
         // Press Trial Params
@@ -171,6 +185,9 @@ var Mousetrack = function(rewards) {
                 case guess_row:
                     pushTrial("double", rewards[label_left_dual_guess][tick_guess], rewards[label_right_dual_guess][tick_guess]);
                     tick_guess += 1;
+                    break;
+                case break_trial:
+                    pushTrial("break");
                     break;
             }
         }

@@ -1,5 +1,5 @@
 .clickarea {
-  background-color:#5a5a5a;
+  background-color:#333;
   overflow:visible;
   width:100px;
   height:90px;
@@ -51,4 +51,18 @@
 #press, #trial{
   text-align: center;
   font-size: 48px;
+}
+
+#start-exp {
+  visibility: hidden;
+  text-align: center;
+  position: fixed;
+  bottom: 0%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: auto;
+  margin-bottom: 5px;
+  padding: 5px;
+  background-color:#77f;
+  width:100px;
 }
