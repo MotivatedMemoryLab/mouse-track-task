@@ -89,6 +89,10 @@ var Mousetrack = function(rewards) {
                     document.webkitExitPointerLock;
                 //document.exitPointerLock();
 
+                var cursor = document.getElementById("cursor");
+                cursor.style.display = "inline";
+                console.log("Attempting to show cursor");
+
                 var startExp = document.getElementById("start-exp");
                 startExp.style.visibility = "visible";
                 startExp.onclick = function(){
@@ -99,9 +103,9 @@ var Mousetrack = function(rewards) {
 
                     if (x >= bb.left && x <= bb.right && y >= bb.top && y <= bb.bottom){
                         startTrial();
+                        startExp.style.display = "None";
                     }
                 };
-                startTrial();
             }
         }
 
