@@ -10,7 +10,7 @@ class Trial {
 
   press(key, num, duration, val1, val2){
     var doPress = function(){
-      this.myBody = document.getElementsByTagName("BODY")[0];
+      this.myBody = document.body;
       container.innerHTML = "Press the '" + key + "' key quickly to reveal award amounts. Start when you are ready.";
       container.style.textAlign = "center";
       var indicator = document.createElement("DIV");
@@ -93,103 +93,12 @@ class Trial {
     }
   }
 
-  pix2num(pix){
-    return parseFloat(pix.substring(0, pix.length - 2));
-  }
-
-  moveCallback(e){
-    var cursor = this.cursor;
-    var factor = this.factor;
-
-    var movementX = e.movementX ||
-        e.mozMovementX          ||
-        e.webkitMovementX       ||
-        0,
-    movementY = e.movementY ||
-        e.mozMovementY      ||
-        e.webkitMovementY   ||
-        0;
-
-    var pix2num = this.pix2num;
-    this.mouseRecord(pix2num(cursor.style.left), pix2num(cursor.style.top));
-
-    if(movementX > 0){
-      var newleft = pix2num(cursor.style.left) + movementX/factor;
-      if(newleft < 1920){
-        cursor.style.left = newleft.toString() + "px";
-      }
-    } else if(movementX < 0){
-      var newleft = pix2num(cursor.style.left) + movementX/factor;
-      if(newleft > 0){
-        cursor.style.left = newleft.toString() + "px";
-      }
-    }
-
-    if(movementY > 0){
-      var newtop = pix2num(cursor.style.top) + movementY/factor;
-      if(newtop < 1000){
-        cursor.style.top = newtop.toString() + "px";
-      }
-    } else if(movementY < 0){
-      var newtop = pix2num(cursor.style.top) + movementY/factor;
-      if(newtop > 0){
-        cursor.style.top = newtop.toString() + "px";
-      }
-    }
-
-    var clickareas = document.getElementsByClassName("clickarea");
-    for(var i = 0; i < clickareas.length; i++){
-      if(this.lockMouseOn(clickareas[i].getBoundingClientRect())){
-        clickareas[i].style.border = "medium solid white";
-      } else {
-        clickareas[i].style.border = "thin solid " + String(clickareas[i].style.backgroundColor);
-      }
-    }
-  }
-
-  lockMouseOn(bb){
-    var cursor = this.cursor;
-    var x = this.pix2num(cursor.style.left) + cursor.width/2;
-    var y = this.pix2num(cursor.style.top) + cursor.height/2;
-
-    return x >= bb.left && x <= bb.right && y >= bb.top && y <= bb.bottom;
-  }
-
   checkClicks(){
     var clickareas = document.getElementsByClassName("clickarea");
     for(var i = 0; i < clickareas.length; i++){
-      if(this.lockMouseOn(clickareas[i].getBoundingClientRect())){
+      if(cursorOn(clickareas[i])){
         this.hitDetect.call(this, clickareas[i]);
       }
-    }
-  }
-
-
-
-  changeCallback(e){
-    var cursor = this.cursor;
-    if (document.pointerLockElement === cursor ||
-          document.mozPointerLockElement === cursor ||
-          document.webkitPointerLockElement === cursor) {
-        // Pointer was just locked
-        // Enable the mousemove listener
-
-        cursor.style.display = 'inline';
-
-        if(!this.started){
-          this.mover = this.moveCallback.bind(this);
-          document.onmousemove = this.mover;
-          this.started = true;
-          this.startTrial.call(this);
-
-    }
-      } else {
-        // Pointer was just unlocked
-        // Disable the mousemove listener
-        document.onmousemove = undefined;
-        cursor.style.display = 'none';
-
-        document.onclick = undefined;
     }
   }
 
@@ -198,56 +107,27 @@ class Trial {
     this.mouse = [];
     this.mtimes = [];
     this.choice = 0;
-    this.timers = [];
-    this.myBody = document.getElementsByTagName("BODY")[0];
+    this.timer = null;
+    this.myBody = document.body;
 
     var cursor = this.cursor;
-    cursor.requestPointerLock = cursor.requestPointerLock ||
-        cursor.mozRequestPointerLock ||
-        cursor.webkitRequestPointerLock;
-
-
-    var lock = this.changeCallback.bind(this);
-    document.onpointerlockchange = document.onpointerlockchange ||
-          document.onmozpointerlockchange ||
-          document.onwebkitpointerlockchange;
-
-    document.onpointerlockchange = lock;
-
 
     cursor.style.left = String(window.innerWidth / 2) + 'px';
     cursor.style.top = String(window.innerHeight - 20) + 'px';
     cursor.style.display = 'inline';
-    //document.exitPointerLock();
-    cursor.requestPointerLock(); // Just in case the user cancelled it or something...
+    this.startTrial();
   }
 
   startTrial(){
     this.startTime = Date.now();
-    //this.start.style.cursor = "auto";
-    var timers = this.timers;
     var _myself = this;
 
-    /*
-    var start = this.start;
-    start.onclick = undefined;
-    start.innerHTML = "5<br />Seconds";
-    start.style.background='#27e800';
-    */
+    document.addEventListener("click", this.checkClicks.bind(this));
 
-    document.onclick = this.checkClicks.bind(this);
-
-    /*
-    timers.push(setTimeout(function(){ start.innerHTML = "4<br />Seconds" }, 1000));
-    timers.push(setTimeout(function(){ start.innerHTML = "3<br />Seconds" }, 2000));
-    timers.push(setTimeout(function(){ start.innerHTML = "2<br />Seconds" }, 3000));
-    timers.push(setTimeout(function(){ start.innerHTML = "1<br />Seconds" }, 4000));
-    */
-    timers.push(setTimeout(function(){
+    this.timer = setTimeout(function(){
       _myself.finish();
-      //document.getElementById("submitButton").style.display="none";
-    }, 5000));
-
+    }, 5000);
+    document.addEventListener("mousemove", this.mouseRecord.bind(this));
   }
 
   createClickArea(gravity, cash, reveal, type){
@@ -267,25 +147,6 @@ class Trial {
     this.container.appendChild(div);
   }
 
-  addStart(){
-    var start = document.createElement("DIV");
-    start.id = "startarea";
-    start.innerHTML = "Click here to start.";
-    var cursor = this.cursor;
-    cursor.requestPointerLock = cursor.requestPointerLock ||
-           cursor.mozRequestPointerLock ||
-           cursor.webkitRequestPointerLock;
-    start.onclick = function(e){
-      cursor.style.left = String(e.clientX) + 'px';
-      cursor.style.top = String(e.clientY) + 'px';
-      cursor.requestPointerLock();
-    }
-
-    container.appendChild(start);
-    this.start = start;
-
-  }
-
   mouseRecord(x, y){
     var coor = "{" + x + "," + y + "}";
     this.mouse.push(coor);
@@ -299,32 +160,17 @@ class Trial {
 
   finish(){
     this.started = false;
-    document.onmousemove = undefined;
     this.cursor.style.display = "none";
-    /*
-    document.exitPointerLock = document.exitPointerLock ||
-         document.mozExitPointerLock ||
-         document.webkitExitPointerLock;
-    document.exitPointerLock();
-    */
-    var clickareas = document.getElementsByClassName("clickarea");
-    for(var i = 0; i < clickareas.length; i++){
-      clickareas[i].onclick = undefined;
-    }
 
-    //this.start.innerHTML = "You won:<br />$" + parseFloat(this.choice).toFixed(2);
+    clearTimeout(this.timer);
+    document.removeEventListener("mousemove", this.mouseRecord);
+    document.removeEventListener("click", this.checkClicks);
 
-    //document.getElementById("demo").innerHTML = document.getElementById("mturk_form").choicedata;
-    for(var i = 0; i <  this.timers.length; i++){
-      clearTimeout(this.timers[i]);
-    }
     var ret = this.ret;
     ret.push(this.mtimes, this.mouse, this.choice);
 
     showMessage(this, "You won: $" + parseFloat(this.choice).toFixed(2), "white", false,
         function(){ this.next(ret);  }.bind(this), 3000);
-    //setTimeout(function(){ this.next(ret);  }.bind(this), 3000) //runs next trial
-
   }
 
 }

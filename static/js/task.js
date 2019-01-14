@@ -63,53 +63,20 @@ var Mousetrack = function(rewards) {
 
     if(havePointerLock){
 
-        var cursor = document.getElementById('cursor');
+        showMessage(trial, "Get Ready! This is a practice run. Do not resize or exit this window until you are done. Press t and read the cursor prompt to begin.", "white", true,
+        function(){
 
-        function firstTap(){
-
-            document.onpointerlockchange = document.onpointerlockchange ||
-                document.onmozpointerlockchange ||
-                document.onwebkitpointerlockchange;
-
-            document.onpointerlockchange = lockReceived;
-
-            cursor.requestPointerLock = cursor.requestPointerLock ||
-                cursor.mozRequestPointerLock ||
-                cursor.webkitRequestPointerLock;
-            cursor.requestPointerLock();
-        }
-
-        function lockReceived(){
-            if(document.pointerLockElement === cursor ||
-                document.mozPointerLockElement === cursor ||
-                document.webkitPointerLockElement === cursor) {
-
-                document.exitPointerLock = document.exitPointerLock ||
-                    document.mozExitPointerLock ||
-                    document.webkitExitPointerLock;
-                //document.exitPointerLock();
-
-                var cursor = document.getElementById("cursor");
-                cursor.style.display = "inline";
-                console.log("Attempting to show cursor");
-
-                var startExp = document.getElementById("start-exp");
-                startExp.style.visibility = "visible";
-                startExp.onclick = function(){
-                    var bb = startExp.getBoundingClientRect();
-                    var cursor = this.cursor;
-                    var x = this.pix2num(cursor.style.left) + cursor.width/2;
-                    var y = this.pix2num(cursor.style.top) + cursor.height/2;
-
-                    if (x >= bb.left && x <= bb.right && y >= bb.top && y <= bb.bottom){
-                        startTrial();
-                        startExp.style.display = "None";
-                    }
-                };
-            }
-        }
-
-        showMessage(trial, "Get Ready! This is a practice run. Do not resize or exit this window until you are done. Press t and read the cursor prompt to begin.", "white", true, firstTap);
+            lockMouse.call(trial);
+            var startExp = document.getElementById("start-exp");
+            startExp.style.visibility = "visible";
+            document.addEventListener("click", function start(){
+                if(cursorOn(startExp)){
+                    startTrial();
+                    startExp.style.display = "None";
+                }
+                document.removeEventListener("click", start);
+            })
+        });
 
         calculate_trials(4, 4, 4, 4, 8);
 
