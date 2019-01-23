@@ -10,4 +10,7 @@
 # database_url = mysql://user:passwd@127.0.0.1:3306/dbname
 # table_name = tbname
 dbcreds
+psidb.sh
+
 resources
+todo.txt
