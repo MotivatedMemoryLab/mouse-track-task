@@ -11,7 +11,7 @@ class Trial {
   press(key, num, duration, val1, val2){
     var doPress = function(){
       this.myBody = document.body;
-      container.innerHTML = "Press the '" + key + "' key quickly to reveal award amounts. Start when you are ready.";
+      container.innerHTML = "Press the '" + key + "' key quickly to reveal award amounts.";
       container.style.textAlign = "center";
       var indicator = document.createElement("DIV");
       indicator.style.visibility = "hidden";
@@ -30,6 +30,7 @@ class Trial {
         _myself.pressed(e);
       };
       container.appendChild(indicator);
+      setTimeout(this.endPress.bind(this), this.duration)
     };
     this.ret = ["press", num, duration, val1, val2];
     showMessage(this, "Double: Press", "red", false, doPress);
@@ -61,10 +62,10 @@ class Trial {
 
   //-----------------------SUPPOSED TO BE PRIVATE-----------------------//
   doDouble(val1, val2, reveal, type){
-    container.innerHTML = "";
+    this.container.innerHTML = "";
     this.createClickArea("left", val1, reveal, type);
     this.createClickArea("right", val2, reveal, type);
-    //this.addStart();
+
     this.runTrial()
   }
 
@@ -73,7 +74,7 @@ class Trial {
     this.container.children[0].style.background =
       (this.presses >= this.num) ? "#0a0" : "#a00";
 
-    this.ret.push(this.presses, this.num);
+    this.ret.push(this.presses);
     setTimeout(function(){
       this.doDouble(this.val1, this.val2, this.presses >= this.num, "double")
     }.bind(this), 1500)
@@ -85,21 +86,29 @@ class Trial {
       this.key = " ";
     }
     if(e.key === this.key){
-      this.indicator.style.background = "#888";
-      if(this.presses === 0){
-        setTimeout(this.endPress.bind(this), this.duration);
-      }
       this.presses += 1;
     }
   }
 
   checkClicks(){
-    var clickareas = document.getElementsByClassName("clickarea");
-    for(var i = 0; i < clickareas.length; i++){
-      if(cursorOn(clickareas[i])){
-        this.hitDetect.call(this, clickareas[i]);
-      }
-    }
+      let clickareas = document.getElementsByClassName("clickarea");
+      let _myself = this;
+      Array.from(clickareas).forEach(function(area){
+          if(cursorOn(area)){
+              _myself.hitDetect.call(_myself, area);
+          }
+      })
+  }
+
+  border(){
+      let clickareas = document.getElementsByClassName("clickarea");
+      Array.from(clickareas).forEach(function(area){
+          if(cursorOn(area)){
+              area.style.borderColor = "white";
+          } else if(area.style.borderColor === "white"){
+              area.style.borderColor = area.style.backgroundColor;
+          }
+      })
   }
 
   runTrial(){
@@ -123,6 +132,7 @@ class Trial {
     var _myself = this;
 
     document.addEventListener("click", this.checkClicks.bind(this));
+    document.addEventListener("mousemove", this.border.bind(this));
 
     this.timer = setTimeout(function(){
       _myself.finish();
@@ -144,11 +154,12 @@ class Trial {
       div.style.background = rgb;
     }
     div.style.borderColor = div.style.backgroundColor;
+
     this.container.appendChild(div);
   }
 
-  mouseRecord(x, y){
-    var coor = "{" + x + "," + y + "}";
+  mouseRecord(e){
+    var coor = "{" + e.clientX + "," + e.clientY + "}";
     this.mouse.push(coor);
     this.mtimes.push(Date.now() - this.startTime);
   }
@@ -165,6 +176,7 @@ class Trial {
     clearTimeout(this.timer);
     document.removeEventListener("mousemove", this.mouseRecord);
     document.removeEventListener("click", this.checkClicks);
+    document.removeEventListener("mousemove", this.border);
 
     var ret = this.ret;
     ret.push(this.mtimes, this.mouse, this.choice);

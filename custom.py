@@ -72,7 +72,7 @@ def list_my_data():
 def compute_bonus():
     # check that user provided the correct keys
     # errors will not be that gracefull here if being
-    # accessed by the Javascrip client
+    # accessed by the Javascript client
     if not request.args.has_key('uniqueId'):
         raise ExperimentError('improper_inputs')  # i don't like returning HTML to JSON requests...  maybe should change this
     uniqueId = request.args['uniqueId']
@@ -87,15 +87,12 @@ def compute_bonus():
 
         for record in user_data['data']: # for line in data file
             trial = record['trialdata']
-            if trial['phase']=='TEST':
-                if trial['hit']==True:
-                    bonus += 0.02
-        user.bonus = bonus
+            if trial['phase']=='trial':
+                bonus += float(trial['choice'])
+        user.bonus = "%.2f" % round(bonus,2)
         db_session.add(user)
         db_session.commit()
         resp = {"bonusComputed": "success"}
         return jsonify(**resp)
     except:
         abort(404)  # again, bad to display HTML, but...
-
-    

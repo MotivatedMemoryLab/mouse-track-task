@@ -8,5 +8,6 @@ do
 	echo "Waiting..."
     sleep 1
 done
+
 screen -S exp -X quit
 echo "Exited."

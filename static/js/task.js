@@ -78,7 +78,7 @@ var Mousetrack = function(rewards) {
             })
         });
 
-        calculate_trials(4, 4, 4, 4, 8);
+        calculate_trials(1, 0, 0, 0, 1);
 
         // pushTrial("double", 0.36, 0.74);
         // pushTrial("press", "spacebar", 11, 2000, 0.82, 0.07);
@@ -200,36 +200,47 @@ var Mousetrack = function(rewards) {
 
     function next(){
 
-        switch(arguments[0]){
+        console.log(arguments);
+        console.log(arguments[0]);
+        switch(arguments[0][0]){
             case "press":
-                psiTurk.recordTrialData({'trial':"press",
-                    'num':arguments[1],
-                    'duration':arguments[2],
-                    'val1':arguments[3],
-                    'val2':arguments[4],
-                    'presses':arguments[5]
+                psiTurk.recordTrialData({
+                    'phase': "trial",
+                    'trial':"press",
+                    'num':arguments[0][1],
+                    'duration':arguments[0][2],
+                    'val1':arguments[0][3],
+                    'val2':arguments[0][4],
+                    'presses':arguments[0][5],
+                    'mtimes':arguments[0][6],
+                    'mouse':arguments[0][7],
+                    'choice':arguments[0][8]
                     }
                 );
                 break;
             case "double":
-                psiTurk.recordTrialData({'trial':"double",
-                        'val1':arguments[1],
-                        'val2':arguments[2],
-                        'reveal':arguments[3],
-                        'mtimes':arguments[4],
-                        'mouse':arguments[5],
-                        'choice':arguments[6],
+                psiTurk.recordTrialData({
+                        'phase': "trial",
+                        'trial':"double",
+                        'val1':arguments[0][1],
+                        'val2':arguments[0][2],
+                        'reveal':arguments[0][3],
+                        'mtimes':arguments[0][4],
+                        'mouse':arguments[0][5],
+                        'choice':arguments[0][6],
                     }
                 );
                 break;
             case "single":
-                psiTurk.recordTrialData({'trial':"single",
-                        'value':arguments[1],
-                        'side':arguments[2],
-                        'reveal':arguments[3],
-                        'mtimes':arguments[4],
-                        'mouse':arguments[5],
-                        'choice':arguments[6],
+                psiTurk.recordTrialData({
+                        'phase': "trial",
+                        'trial':"single",
+                        'value':arguments[0][1],
+                        'side':arguments[0][2],
+                        'reveal':arguments[0][3],
+                        'mtimes':arguments[0][4],
+                        'mouse':arguments[0][5],
+                        'choice':arguments[0][6],
                     }
                 );
                 break;

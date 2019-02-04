@@ -61,8 +61,8 @@ function lockMouse(){ // Must be called in context of Trial, e.g. from showMessa
                 document.webkitExitPointerLock;
 
             cursor.style.display = "inline";
-            cursor.style.left = "0px";
-            cursor.style.top = "0px";
+            cursor.style.left = "500px";
+            cursor.style.top = "500px";
 
         } else {
             cursor.style.display = "none";

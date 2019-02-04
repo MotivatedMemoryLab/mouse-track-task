@@ -7,8 +7,13 @@ if [ -r util/dbcreds ]; then
 	sed -i "$str" $config
 
 	port=31420
-	
-	while netstat -al | grep -q $port ; do
+
+	while netstat -al | grep  $port | grep "*.*" | grep -q TIME_WAIT ; do
+        echo "Waiting for port to open..."
+        sleep 10
+    done
+
+	while netstat -al | grep $port | grep -q LISTEN ; do
 		let port=port+1
 	done
 
@@ -16,7 +21,10 @@ if [ -r util/dbcreds ]; then
 
 	let port=port-10
 
-	sed -i "s|:[0-9]+/ad|:$port/ad|" $config
+	sed -i "s|:[0-9]\+/ad|:$port/ad|" $config
+
+    echo "Server set up on port $port."
+
 else
 	echo "You need to have a dbcreds file in the util directory."
 fi
