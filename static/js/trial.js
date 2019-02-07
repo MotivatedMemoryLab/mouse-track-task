@@ -1,12 +1,33 @@
 class Trial {
-  constructor(container, nextHandler){
+
+  constructor(container, nextHandler, onUnlock){
     this.container = container;
     this.next = nextHandler;
     this.cursor = document.getElementById('cursor');
     this.factor = 10;
+    this.unlock = onUnlock;
+    this.valid = true;
   }
 
+  setup(onFail){
+    this.unlock = function() {
+      
+      this.cursor.style.display = "none";
+      this.valid = false;
+      clearTimeout(this.timer);
 
+      console.log("Listeners removed");
+
+      document.removeEventListener("mousemove", this.mouseRecord);
+      document.removeEventListener("click", this.checkClicks);
+      document.removeEventListener("mousemove", this.border);
+
+      showMessage(this, "You have unlocked the cursor. " +
+            "This would invalidate your results in the main experiment. " +
+            "Since this is practice, click anywhere to start over and try again.",
+            "red", true, onFail);
+    }.bind(this);
+  }
 
   press(key, num, duration, val1, val2){
     var doPress = function(){
@@ -32,6 +53,8 @@ class Trial {
       container.appendChild(indicator);
       setTimeout(this.endPress.bind(this), this.duration)
     };
+    console.log("cursor hidden");
+    this.cursor.style.display = "none";
     this.ret = ["press", num, duration, val1, val2];
     showMessage(this, "Double: Press", "red", false, doPress);
 
@@ -44,17 +67,23 @@ class Trial {
       //this.addStart();
       this.runTrial()
     };
+
+    console.log("cursor hidden");
+    this.cursor.style.display = "none";
     this.ret = ["single", val, side, reveal];
-    this.started = false;
+    
     showMessage(this, "Single", "blue", false, doSingle);
   }
 
   double(val1, val2, reveal = false){
-    this.ret = ["double", val1, val2, reveal];
-    this.started = false;
     var runDouble = function(){
       this.doDouble(val1, val2, reveal, "guess");
-    }
+    };
+
+    console.log("cursor hidden");
+    this.cursor.style.display = "none";
+    this.ret = ["double", val1, val2, reveal];
+
     showMessage(this, "Double: Blank", "gray", false, runDouble);
 
   }
@@ -91,13 +120,13 @@ class Trial {
   }
 
   checkClicks(){
-      let clickareas = document.getElementsByClassName("clickarea");
-      let _myself = this;
-      Array.from(clickareas).forEach(function(area){
-          if(cursorOn(area)){
-              _myself.hitDetect.call(_myself, area);
-          }
-      })
+    var trial = getTrial();
+    let clickareas = document.getElementsByClassName("clickarea");
+    Array.from(clickareas).forEach(function(area){
+        if(cursorOn(area)){
+            trial.hitDetect.call(trial, area);
+        }
+    })
   }
 
   border(){
@@ -128,16 +157,16 @@ class Trial {
   }
 
   startTrial(){
+
     this.startTime = Date.now();
     var _myself = this;
-
-    document.addEventListener("click", this.checkClicks.bind(this));
-    document.addEventListener("mousemove", this.border.bind(this));
+    document.addEventListener("click", this.checkClicks);
+    document.addEventListener("mousemove", this.border);
+    document.addEventListener("mousemove", this.mouseRecord);
 
     this.timer = setTimeout(function(){
       _myself.finish();
     }, 5000);
-    document.addEventListener("mousemove", this.mouseRecord.bind(this));
   }
 
   createClickArea(gravity, cash, reveal, type){
@@ -159,9 +188,10 @@ class Trial {
   }
 
   mouseRecord(e){
-    var coor = "{" + e.clientX + "," + e.clientY + "}";
-    this.mouse.push(coor);
-    this.mtimes.push(Date.now() - this.startTime);
+    let trial = getTrial();
+    let coor = "{" + e.clientX + "," + e.clientY + "}";
+    trial.mouse.push(coor);
+    trial.mtimes.push(Date.now() - trial.startTime);
   }
 
   hitDetect(target) {
@@ -170,10 +200,11 @@ class Trial {
   }
 
   finish(){
-    this.started = false;
+    
     this.cursor.style.display = "none";
 
     clearTimeout(this.timer);
+    console.log("Listeners removed");
     document.removeEventListener("mousemove", this.mouseRecord);
     document.removeEventListener("click", this.checkClicks);
     document.removeEventListener("mousemove", this.border);
@@ -181,6 +212,7 @@ class Trial {
     var ret = this.ret;
     ret.push(this.mtimes, this.mouse, this.choice);
 
+    console.log(this.choice);
     showMessage(this, "You won: $" + parseFloat(this.choice).toFixed(2), "white", false,
         function(){ this.next(ret);  }.bind(this), 3000);
   }

@@ -26,28 +26,7 @@
   color: white;
   font-family: sans-serif;
 }
-#startarea { /* This is no longer displayed */
-  text-align: center;
-  position: fixed;
-  bottom: 0%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: auto;
-  margin-bottom: 5px;
-  padding: 5px;
-  background-color:#77f;
-  width:100px;
-  cursor: pointer;
-}
-#submitButton { /* This is no longer displayed */
-  position: fixed;
-  top: 0%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: auto;
-  margin-top: 50px;
-  display: none;
-}
+
 #press, #trial{
   text-align: center;
   font-size: 48px;

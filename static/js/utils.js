@@ -9,24 +9,21 @@ function assert(exp, message) {
 	}
 }
 
-function showMessage(trial, message, color, waitPress, callback){
+function showMessage(trial, message, color, waitClick, callback){
     var container = document.getElementById("container");
     document.getElementsByTagName("BODY")[0].style.backgroundColor = 'rgb(90, 90, 90)';
     container.innerHTML = '<div id="ready" style="color: ' + color + '"></div>';
     var ready = document.getElementById("ready");
     ready.style.fontSize = "30px";
     ready.innerText = message;
-    if(waitPress){
-        var pressed = function(e){
-            if(e.key === "t"){
-                document.onkeypress = undefined;
-                callback.call(trial);
-            }
-
-        }
-        document.onkeypress = pressed;
+    if(waitClick){
+        var clicked = function(e){
+            document.removeEventListener("click", clicked);
+            callback.call(trial, e);
+        };
+        document.addEventListener("click", clicked, false);
     } else {
-        setTimeout(function(){callback.call(trial)}, 2000)
+        setTimeout(function(){if (trial.valid) callback.call(trial)}, 2000)
     }
 }
 
@@ -34,9 +31,12 @@ function pix2num(pix){
     return parseFloat(pix.substring(0, pix.length - 2));
 }
 
-function lockMouse(){ // Must be called in context of Trial, e.g. from showMessage.
+function lockMouse(x, y){ // Must be called in context of Trial, e.g. from showMessage.
     var cursor = this.cursor;
     var moveFactor = this.factor;
+    var trial = this;
+    cursor.style.display = "inline";
+
     document.onpointerlockchange = document.onpointerlockchange ||
         document.onmozpointerlockchange ||
         document.onwebkitpointerlockchange;
@@ -60,12 +60,13 @@ function lockMouse(){ // Must be called in context of Trial, e.g. from showMessa
                 document.mozExitPointerLock ||
                 document.webkitExitPointerLock;
 
-            cursor.style.display = "inline";
-            cursor.style.left = "500px";
-            cursor.style.top = "500px";
+            cursor.style.left = x + "px";
+            cursor.style.top = y + "px";
 
         } else {
             cursor.style.display = "none";
+            document.removeEventListener("mousemove", moveCallback);
+            trial.unlock();
         }
     }
 
@@ -118,4 +119,14 @@ function cursorOn(element) {
     var y = pix2num(cursor.style.top) + cursor.height/2;
 
     return x >= bb.left && x <= bb.right && y >= bb.top && y <= bb.bottom;
+}
+
+var trial = null;
+
+function setTrial(t){
+    trial = t;
+}
+
+function getTrial() {
+    return trial;
 }

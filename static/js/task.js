@@ -53,36 +53,61 @@ var Mousetrack = function(rewards) {
     });
     */
 
-    var trial = new Trial(document.getElementById('container'), next);
-    var trials = [];
+    var trial = null;
+    var trials = null;
+
+    rewards = rewards.split("\n").map(function(row){return row.split(",");});
+
+
+    var createPractice = function () {
+        trial = new Trial(document.getElementById('container'), next);
+        setTrial(trial);
+        trials = [];
+        calculate_trials(1, 1, 1, 1, 2);
+    };
+
+    var createMain = function () {
+        trial = new Trial(document.getElementById('container'), next);
+        setTrial(trial);
+        trials = [];
+        calculate_trials(75, 25, 25, 50, 25);
+    };
 
     var havePointerLock = 'pointerLockElement' in document ||
         'mozPointerLockElement' in document ||
         'webkitPointerLockElement' in document;
 
+    var getCursor = function(){
+        var clicked = function(e){
+            console.log("Capture event");
+            document.removeEventListener("click", clicked, true);
+            lockMouse.call(trial, e.clientX, e.clientY);
+        };
+        document.addEventListener("click", clicked, true);
+    };
+
+    var showStart = function(){
+        createPractice();
+        getCursor();
+        var startExp = document.getElementById("start-exp");
+        startExp.style.visibility = "visible";
+        document.addEventListener("click", function start(){
+            if(cursorOn(startExp)){
+                document.removeEventListener("click", start);
+                trial.setup(showStart);
+                startTrial();
+                startExp.style.visibility = "hidden";
+            }
+        });
+        showMessage(trial, "Get Ready! This is a practice run. Do not resize or exit this window until you are done. Click and read the cursor prompt to begin.", "white", true,
+            function(){
+                trial.unlock = getCursor;
+            });
+    };
+
 
     if(havePointerLock){
-
-        showMessage(trial, "Get Ready! This is a practice run. Do not resize or exit this window until you are done. Press t and read the cursor prompt to begin.", "white", true,
-        function(){
-
-            lockMouse.call(trial);
-            var startExp = document.getElementById("start-exp");
-            startExp.style.visibility = "visible";
-            document.addEventListener("click", function start(){
-                if(cursorOn(startExp)){
-                    startTrial();
-                    startExp.style.display = "None";
-                }
-                document.removeEventListener("click", start);
-            })
-        });
-
-        calculate_trials(1, 0, 0, 0, 1);
-
-        // pushTrial("double", 0.36, 0.74);
-        // pushTrial("press", "spacebar", 11, 2000, 0.82, 0.07);
-        // pushTrial("single", 0.43, "left");
+        showStart();
 
     } else {
         showMessage(trial, "Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
@@ -96,7 +121,7 @@ var Mousetrack = function(rewards) {
                 ret.push(data);
             }
             return ret
-        }
+        };
         const press_row = 15;
         const left_solo_row = 16;
         const right_solo_row = 17;
@@ -108,7 +133,8 @@ var Mousetrack = function(rewards) {
         arr.push.apply(arr, expand(right_solo_row, num_right_solo));
         arr.push.apply(arr, expand(guess_row, num_guess));
         arr = _.shuffle(arr);
-        for(var i = break_threshold; i < arr.length; i+= break_threshold){
+        let len = arr.length;
+        for(var i = break_threshold; i < len; i+= break_threshold + 1){
             arr.splice(i, 0, break_trial);
         }
 
@@ -133,8 +159,6 @@ var Mousetrack = function(rewards) {
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
-
-        rewards = rewards.split("\n").map(function(row){return row.split(",");});
 
         for(var j = 0; j < arr.length; j++){
             switch (arr[j]){
@@ -185,7 +209,10 @@ var Mousetrack = function(rewards) {
                     trial.press(info[1], info[2], info[3], info[4], info[5]);
                     break;
                 case "break":
-                    showMessage(trial, "Take a break. Press t to continue.", "white", true, function(){
+                    trial.unlock = getCursor;
+                    showMessage(trial, "Take a break. Click to continue.", "white", true, function(){
+                        trial.setup(showStart);
+                        trial.valid = true;
                         startTrial();
                     });
                     break;
@@ -194,14 +221,13 @@ var Mousetrack = function(rewards) {
             console.log("Done!");
 
             document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
+            document.onpointerlockchange = undefined;
             currentview = new Questionnaire();
         }
     }
 
     function next(){
 
-        console.log(arguments);
-        console.log(arguments[0]);
         switch(arguments[0][0]){
             case "press":
                 psiTurk.recordTrialData({
