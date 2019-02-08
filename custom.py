@@ -89,6 +89,9 @@ def compute_bonus():
             trial = record['trialdata']
             if trial['phase']=='trial':
                 bonus += float(trial['choice'])
+            elif trial['phase']=='exit':
+                bonus = 0
+                break
         user.bonus = "%.2f" % round(bonus,2)
         db_session.add(user)
         db_session.commit()

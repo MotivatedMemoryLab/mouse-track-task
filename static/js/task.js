@@ -55,22 +55,26 @@ var Mousetrack = function(rewards) {
 
     var trial = null;
     var trials = null;
+    var mode = "practice";
 
     rewards = rewards.split("\n").map(function(row){return row.split(",");});
 
 
     var createPractice = function () {
+        mode = "practice";
         trial = new Trial(document.getElementById('container'), next);
         setTrial(trial);
         trials = [];
-        calculate_trials(1, 1, 1, 1, 2);
+        calculate_trials(1, 0, 0, 0, 2);
     };
 
     var createMain = function () {
+        mode = "main";
         trial = new Trial(document.getElementById('container'), next);
         setTrial(trial);
         trials = [];
-        calculate_trials(75, 25, 25, 50, 25);
+        //calculate_trials(75, 25, 25, 50, 25);
+        calculate_trials(0, 0, 0, 1, 2);
     };
 
     var havePointerLock = 'pointerLockElement' in document ||
@@ -79,27 +83,54 @@ var Mousetrack = function(rewards) {
 
     var getCursor = function(){
         var clicked = function(e){
-            console.log("Capture event");
             document.removeEventListener("click", clicked, true);
             lockMouse.call(trial, e.clientX, e.clientY);
         };
         document.addEventListener("click", clicked, true);
     };
 
-    var showStart = function(){
-        createPractice();
+    var restart = function(){
+        showMessage(this, "You have unlocked the cursor. " +
+            "This would invalidate your results in the main experiment. " +
+            "Since this is practice, click anywhere to start over and try again.",
+            "red", true,
+            showStart.bind(null, "Get Ready! This is a practice run. " +
+                "Do not resize or exit this window until you are done. " +
+                "Click and read the cursor prompt to begin.")
+        )
+    };
+
+    var exit = function(){
+        showMessage(this, "You have unlocked the cursor during the main experiment, " +
+            "and unfortunately you cannot continue. You will still be able to complete " +
+            "this hit, but will not be awarded a bonus. Please click to continue.", "white",     true,
+            function(){
+                psiTurk.recordTrialData({
+                    'phase':'exit'
+                });
+
+                document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
+                document.onpointerlockchange = undefined;
+                currentview = new Questionnaire();
+            }
+        )
+    };
+
+    var showStart = function(message){
+        if (mode === "practice") createPractice();
+        else if (mode === "main") createMain();
         getCursor();
         var startExp = document.getElementById("start-exp");
         startExp.style.visibility = "visible";
         document.addEventListener("click", function start(){
             if(cursorOn(startExp)){
                 document.removeEventListener("click", start);
-                trial.setup(showStart);
+                trial.setup(mode === "practice" ? restart : exit);
                 startTrial();
                 startExp.style.visibility = "hidden";
             }
         });
-        showMessage(trial, "Get Ready! This is a practice run. Do not resize or exit this window until you are done. Click and read the cursor prompt to begin.", "white", true,
+        showMessage(trial, message, "white", true,
             function(){
                 trial.unlock = getCursor;
             });
@@ -107,10 +138,11 @@ var Mousetrack = function(rewards) {
 
 
     if(havePointerLock){
-        showStart();
+        showStart("Get Ready! This is a practice run. Do not resize or exit this window until you are done. " +
+            "Click and read the cursor prompt to begin.");
 
     } else {
-        showMessage(trial, "Cannot replace the mouse cursor, please try another browser.", 'white', false, function(){});
+        showMessage(trial, "Cannot replace the mouse cursor, please try another browser.", 'white', false, Function);
     }
 
     function calculate_trials(num_press, num_left_solo, num_right_solo, num_guess, break_threshold){
@@ -211,18 +243,24 @@ var Mousetrack = function(rewards) {
                 case "break":
                     trial.unlock = getCursor;
                     showMessage(trial, "Take a break. Click to continue.", "white", true, function(){
-                        trial.setup(showStart);
+                        trial.setup(restart);
                         trial.valid = true;
                         startTrial();
                     });
                     break;
             }
         } else {
-            console.log("Done!");
-
-            document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
-            document.onpointerlockchange = undefined;
-            currentview = new Questionnaire();
+            psiTurk.saveData();
+            if(mode === "practice"){
+                trial.setup(Function);
+                document.exitPointerLock();
+                mode = "main";
+                showStart("You are about to start the main experiment. You must finish completely without exiting for your results to be counted.")
+            } else if (mode === "main") {
+                document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
+                document.onpointerlockchange = undefined;
+                currentview = new Questionnaire();
+            }
         }
     }
 
@@ -233,6 +271,7 @@ var Mousetrack = function(rewards) {
                 psiTurk.recordTrialData({
                     'phase': "trial",
                     'trial':"press",
+                    'mode':mode,
                     'num':arguments[0][1],
                     'duration':arguments[0][2],
                     'val1':arguments[0][3],
@@ -248,6 +287,7 @@ var Mousetrack = function(rewards) {
                 psiTurk.recordTrialData({
                         'phase': "trial",
                         'trial':"double",
+                        'mode':mode,
                         'val1':arguments[0][1],
                         'val2':arguments[0][2],
                         'reveal':arguments[0][3],
@@ -261,6 +301,7 @@ var Mousetrack = function(rewards) {
                 psiTurk.recordTrialData({
                         'phase': "trial",
                         'trial':"single",
+                        'mode':mode,
                         'value':arguments[0][1],
                         'side':arguments[0][2],
                         'reveal':arguments[0][3],
@@ -311,7 +352,7 @@ var Questionnaire = function() {
 			success: function() {
 			    clearInterval(reprompt); 
                 psiTurk.computeBonus('compute_bonus', function(){
-                	psiTurk.completeHIT(); // when finished saving compute bonus, the quit
+                	psiTurk.completeHIT(); // when finished saving compute bonus, then quit
                 }); 
 
 

@@ -16,16 +16,12 @@ class Trial {
       this.valid = false;
       clearTimeout(this.timer);
 
-      console.log("Listeners removed");
-
       document.removeEventListener("mousemove", this.mouseRecord);
       document.removeEventListener("click", this.checkClicks);
       document.removeEventListener("mousemove", this.border);
 
-      showMessage(this, "You have unlocked the cursor. " +
-            "This would invalidate your results in the main experiment. " +
-            "Since this is practice, click anywhere to start over and try again.",
-            "red", true, onFail);
+      onFail();
+
     }.bind(this);
   }
 
@@ -53,7 +49,7 @@ class Trial {
       container.appendChild(indicator);
       setTimeout(this.endPress.bind(this), this.duration)
     };
-    console.log("cursor hidden");
+
     this.cursor.style.display = "none";
     this.ret = ["press", num, duration, val1, val2];
     showMessage(this, "Double: Press", "red", false, doPress);
@@ -68,7 +64,6 @@ class Trial {
       this.runTrial()
     };
 
-    console.log("cursor hidden");
     this.cursor.style.display = "none";
     this.ret = ["single", val, side, reveal];
     
@@ -80,7 +75,6 @@ class Trial {
       this.doDouble(val1, val2, reveal, "guess");
     };
 
-    console.log("cursor hidden");
     this.cursor.style.display = "none";
     this.ret = ["double", val1, val2, reveal];
 
@@ -204,7 +198,6 @@ class Trial {
     this.cursor.style.display = "none";
 
     clearTimeout(this.timer);
-    console.log("Listeners removed");
     document.removeEventListener("mousemove", this.mouseRecord);
     document.removeEventListener("click", this.checkClicks);
     document.removeEventListener("mousemove", this.border);
@@ -212,7 +205,6 @@ class Trial {
     var ret = this.ret;
     ret.push(this.mtimes, this.mouse, this.choice);
 
-    console.log(this.choice);
     showMessage(this, "You won: $" + parseFloat(this.choice).toFixed(2), "white", false,
         function(){ this.next(ret);  }.bind(this), 3000);
   }
