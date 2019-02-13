@@ -1,76 +1,38 @@
 <div id="container-questionnaire">
-    <h1>Task Complete</h1>
+    <h1>Main Task Complete</h1>
 
     <hr />
 
-    <p>You are finished!  Thank you for your contributions to science. You will be eligible for full payment once you answer the following questions.</p>
+    <p>You are finished with the main task! Now we would like you to complete two short behavioral questionnaires about yourself before completing your HIT.</p>
 
     <div class="instructions well">
 
-        <form id="postquiz" action="debrief" method="post">
+        <p>
+            On this questionnaire are pairs of statements. Please read each group of statements carefully, then pick the one statement of each pair which best describes the way you have been feeling over the past week, including today. Click the letter beside the statement you picked. Be sure to read both statements in each pair before making your choice.
+        </p>
 
+        <form id="postquiz" method="post">
 
-            <!-- beginning of a question -->
-            <div class="row question">
-                <div class="col-md-8">
-                    On a scale of 1-10 (where 10 is the most engaged), please rate how <b>ENGAGING</b> you found the learning task:
-                </div>
-                <div class="col-md-4">
-                    <select id="engagement" name="engagement">
-                        <option value="10">10 - Very engaging</option>
-                        <option value="9">9</option>
-                        <option value="8">8</option>
-                        <option value="7">7</option>
-                        <option value="6">6</option>
-                        <option value="5" SELECTED>5 - Moderately</option>
-                        <option value="4">4</option>
-                        <option value="3">3</option>
-                        <option value="2">2</option>
-                        <option value="1">1</option>
-                        <option value="0">0 - Not engaged</option>
-                    </select>
-                </div>
-            </div>
-            <!-- end of a question -->
+            <script>
+                $.ajax({
+                    type: "GET",
+                    url: "static/resources/loc.txt",
+                    dataType: "text",
+                    success: function (data) {
+                        let form = $('#postquiz');
+                        data = data.split("\n");
+                        for (let i = 1; i <= data.length; i += 2){
+                            let j = ((i+1)/2 | 0);
+                            form.append(j + ".<br><input type='radio' name='" + j + "' id='loc'" + j + "a'>" + data[i-1] + "<br>" +
+                            "<input type='radio' name='" + j + "' id='loc" + j + "b'>" + data[i] + "<br>");
+                        }
+                    },
+                    error: function (req, status, error) {
+                        $("body").html("<p>" + error + "</p>");
+                    }
+                })
+            </script>
 
-
-            <!-- beginning of a question -->
-            <div class="row question">
-                <div class="col-md-8">
-                    On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the learning task:
-                </div>
-                <div class="col-md-4">
-                    <select id="difficulty" name="difficulty">
-                        <option value="10">10 - Very difficult</option>
-                        <option value="9">9</option>
-                        <option value="8">8</option>
-                        <option value="7">7</option>
-                        <option value="6">6</option>
-                        <option value="5" SELECTED>5 - Moderately difficult</option>
-                        <option value="4">4</option>
-                        <option value="3">3</option>
-                        <option value="2">2</option>
-                        <option value="1">1</option>
-                        <option value="0">0 - Not difficult at all</option>
-                    </select>
-                </div>
-            </div>
-            <!-- end of a question -->
-
-            <!-- beginning of a question -->
-            <div class="row question">
-                <div class="col-md-8">
-                    What is your dominant hand?
-                </div>
-                <div class="col-md-4">
-                    <select id="handedness" name="handedness">
-                        <option value="left">Left Hand</option>
-                        <option value="right">Right Hand</option>
-                        <option value="both">Ambidextrous</option>
-                    </select>
-                </div>
-            </div>
-            <!-- end of a question -->
 
         </form>
     </div>

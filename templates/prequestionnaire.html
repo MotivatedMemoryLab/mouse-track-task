@@ -1,0 +1,139 @@
+<div id="container-questionnaire">
+    <h1>Participant Information</h1>
+
+    <hr />
+
+    <p>Please answer these questions before you begin the experiment.</p>
+
+    <div class="instructions well">
+
+        <script>
+            function checkValue(val, id){
+                if(val === "other")
+                    document.getElementById('other' + id).style.display = "block";
+                else
+                    document.getElementById('other' + id).style.display = "none";
+            }
+        </script>
+
+        <form id="prequiz" method="post">
+
+            <div class="row question">
+                <div class="col-md-8">
+                    In what year were you born?
+                </div>
+                <div class="col-md-4"><!--
+                    <select id="age" name="age">
+                        {% for i in range(18, 46) %}
+                            <option value="{{ i }}">{{i}}</option>
+                        {% endfor %}
+                    </select>-->
+                    <input type="number" id="age" name="age" min = "1900" max = "2019">
+                </div>
+            </div>
+
+            <div class="row question">
+                <div class="col-md-8">
+                    What was your sex assigned at birth?
+                </div>
+                <div class="col-md-4">
+                    <select id="sex" name="sex">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="withheld">Prefer not to say</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row question">
+                <div class="col-md-8">
+                    What gender do you identify as?
+                </div>
+                <div class="col-md-4">
+                    <select id="gender" name="gender" onchange="checkValue(this.value, 'gender')">
+                        <option value="left">Male</option>
+                        <option value="right">Female</option>
+                        <option value="transgender">Transgender</option>
+                        <option value="withheld">Prefer not to say</option>
+                        <option value="other">Other (Please Specify)</option>
+                    </select>
+                    <input type="text" id="othergender" name="othergender" style="display:none" value=""/>
+                </div>
+            </div>
+
+            <div class="row question">
+                <div class="col-md-8">
+                    What is your sexual identity?
+                </div>
+                <div class="col-md-4">
+                    <select id="sexuality" name="sexuality" onchange="checkValue(this.value, 'sexuality')">
+                        <option value="heterosexual">Straight</option>
+                        <option value="homosexual">Gay / Lesbian</option>
+                        <option value="bisexual">Bisexual</option>
+                        <option value="queer">Queer</option>
+                        <option value="withheld">Prefer not to say</option>
+                        <option value="other">Other (Please Specify)</option>
+                    </select>
+                    <input type="text" id="othersexuality" name="othersexuality" style="display:none" value=""/>
+                </div>
+            </div>
+
+            <div class="row question">
+                <div class="col-md-8">
+                    What is your ethnicity? If multiple, please separate by lines
+                </div>
+                <div class="col-md-4">
+                    <textarea id="ethnicity" name="ethnicity"></textarea>
+                </div>
+            </div>
+
+            <div class="row question">
+                <div class="col-md-8">
+                    What is your handedness?
+                </div>
+                <div class="col-md-4">
+                    <select id="hand" name="hand">
+                        <option value="left">Left Hand</option>
+                        <option value="right">Right Hand</option>
+                        <option value="both">Ambidextrous</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row question">
+                <div class="col-md-8">
+                    How are you controlling the cursor?
+                </div>
+                <div class="col-md-4">
+                    <select id="cursor" name="cursor">
+                        <option value="leftmouse">Left handed mouse</option>
+                        <option value="lefttrack">Left handed trackpad</option>
+                        <option value="lefttouch">Left handed touchscreen</option>
+                        <option value="rightmouse">Right handed mouse</option>
+                        <option value="righttrack">Right handed trackpad</option>
+                        <option value="righttouch">Right handed touchscreen</option>
+                    </select>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <hr />
+
+    <div class="instructionsnav">
+        <div class="row">
+            <div class="col-xs-2">
+            </div>
+            <div class="col-xs-7">
+            </div>
+            <div class="col-xs-3">
+                <button type="button" id="next" value="next" class="btn btn-primary btn-lg continue">
+                    Continue <span class="glyphicon glyphicon-arrow-right"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+</div>

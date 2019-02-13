@@ -70,7 +70,7 @@ class Trial {
     showMessage(this, "Single", "blue", false, doSingle);
   }
 
-  double(val1, val2, reveal = false){
+  double(val1, val2, reveal = true){
     var runDouble = function(){
       this.doDouble(val1, val2, reveal, "guess");
     };

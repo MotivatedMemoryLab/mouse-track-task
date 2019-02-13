@@ -17,6 +17,7 @@ var pages = [
 	"instructions/instruct-2.html",
 	"instructions/instruct-3.html",
 	"instructions/instruct-ready.html",
+    "prequestionnaire.html",
 	"stage.html",
 	"postquestionnaire.html"
 ];
@@ -65,7 +66,7 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next);
         setTrial(trial);
         trials = [];
-        calculate_trials(1, 0, 0, 0, 2);
+        calculate_trials(0, 0, 0, 0, 2);
     };
 
     var createMain = function () {
@@ -74,7 +75,7 @@ var Mousetrack = function(rewards) {
         setTrial(trial);
         trials = [];
         //calculate_trials(75, 25, 25, 50, 25);
-        calculate_trials(0, 0, 0, 1, 2);
+        calculate_trials(0, 0, 0, 0, 2);
     };
 
     var havePointerLock = 'pointerLockElement' in document ||
@@ -322,6 +323,64 @@ var Mousetrack = function(rewards) {
 * Questionnaire *
 ****************/
 
+var PreQ = function(data) {
+    var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
+    record_responses = function() {
+
+        psiTurk.recordTrialData({'phase': 'prequestionnaire', 'status': 'submit'});
+
+        $('textarea').each(function () {
+            psiTurk.recordUnstructuredData(this.id, this.value);
+        });
+        $('input').each(function () {
+            psiTurk.recordUnstructuredData(this.id, this.value);
+        });
+        $('select').each(function () {
+            psiTurk.recordUnstructuredData(this.id, this.value);
+        });
+    };
+
+    let  time = -1;
+
+    prompt_resubmit = function () {
+        if (time >= 0) {
+            clearTimeout(time);
+            time = -1;
+        }
+        document.body.innerHTML = error_message;
+        $("#resubmit").click(resubmit);
+    };
+
+    resubmit = function() {
+        document.body.innerHTML = "<h1>Trying to resubmit...</h1>";
+        time = setTimeout(prompt_resubmit, 10000);
+
+        psiTurk.saveData({
+            success: function() {
+                clearInterval(time);
+                currentview = new Mousetrack(data);
+            },
+            error: prompt_resubmit
+        });
+    };
+
+
+
+    // Load the questionnaire snippet
+    psiTurk.showPage('prequestionnaire.html');
+    psiTurk.recordTrialData({'phase':'prequestionnaire', 'status':'begin'});
+
+    $("#next").click(function () {
+        record_responses();
+        psiTurk.saveData({
+            success: function(){
+                currentview = new Mousetrack(data);
+            },
+            error: prompt_resubmit});
+    });
+
+};
+
 var Questionnaire = function() {
 
 	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
@@ -333,9 +392,15 @@ var Questionnaire = function() {
 		$('textarea').each( function(i, val) {
 			psiTurk.recordUnstructuredData(this.id, this.value);
 		});
+
+		$('input').each( function (i, val) {
+            psiTurk.recordUnstructuredData(this.id, this.value);
+        });
+
 		$('select').each( function(i, val) {
 			psiTurk.recordUnstructuredData(this.id, this.value);		
 		});
+
 
 	};
 
@@ -386,31 +451,6 @@ var currentview;
  * Run Task
  ******************/
 
-/*$(document).ready(function() {
-    $.ajax({
-        type: "GET",
-        url: "static/resources/chances.csv",
-        dataType: "text",
-        success: function(data) {
-            load(data);
-        },
-        error: function(req, status, error){
-            $("body").html("<p>" + error + "</p>");
-        }
-    });
-});*/
-
-/*var load = function(data) {
-    $(window).load(function () {
-        psiTurk.doInstructions(
-            instructionPages, // a list of pages you want to display in sequence
-            function () {
-                currentview = new Mousetrack(data);
-            } // what you want to do when you are done with instructions
-        );
-    });
-};*/
-
 $(window).load( function(){
     psiTurk.doInstructions(
         instructionPages, // a list of pages you want to display in sequence
@@ -421,7 +461,7 @@ $(window).load( function(){
                     url: "static/resources/chances.csv",
                     dataType: "text",
                     success: function (data) {
-                        currentview = new Mousetrack(data);  // what you want to do when you are done with instructions
+                        currentview = new PreQ(data);  // what you want to do when you are done with instructions
                     },
                     error: function (req, status, error) {
                         $("body").html("<p>" + error + "</p>");
