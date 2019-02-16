@@ -19,7 +19,8 @@ var pages = [
 	"instructions/instruct-ready.html",
     "prequestionnaire.html",
 	"stage.html",
-	"postquestionnaire.html"
+    "postquestionnaire.html",
+    "postquestionnaire2.html"
 ];
 
 psiTurk.preloadPages(pages);
@@ -385,24 +386,27 @@ var Questionnaire = function() {
 
 	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
 
-	record_responses = function() {
+	recordLoc = function() {
 
-		psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'submit'});
+		psiTurk.recordTrialData({'phase':'loc', 'status':'submit'});
 
-		$('textarea').each( function(i, val) {
-			psiTurk.recordUnstructuredData(this.id, this.value);
-		});
+		$('input').each( function () {
+            psiTurk.recordUnstructuredData(this.id, this.checked);
+        });
 
-		$('input').each( function (i, val) {
+		console.log("done with loc");
+	};
+
+    recordBisbas = function() {
+
+        psiTurk.recordTrialData({'phase':'bisbas', 'status':'submit'});
+
+        $('select').each( function() {
             psiTurk.recordUnstructuredData(this.id, this.value);
         });
 
-		$('select').each( function(i, val) {
-			psiTurk.recordUnstructuredData(this.id, this.value);		
-		});
 
-
-	};
+    };
 
 	prompt_resubmit = function() {
 		document.body.innerHTML = error_message;
@@ -418,9 +422,7 @@ var Questionnaire = function() {
 			    clearInterval(reprompt); 
                 psiTurk.computeBonus('compute_bonus', function(){
                 	psiTurk.completeHIT(); // when finished saving compute bonus, then quit
-                }); 
-
-
+                });
 			}, 
 			error: prompt_resubmit
 		});
@@ -428,20 +430,34 @@ var Questionnaire = function() {
 
 	// Load the questionnaire snippet 
 	psiTurk.showPage('postquestionnaire.html');
-	psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'begin'});
-	
-	$("#next").click(function () {
-	    record_responses();
-	    psiTurk.saveData({
-            success: function(){
-                psiTurk.computeBonus('compute_bonus', function() { 
-                	psiTurk.completeHIT(); // when finished saving compute bonus, the quit
-                }); 
-            }, 
-            error: prompt_resubmit});
-	});
-    
-	
+	psiTurk.recordTrialData({'phase':'loc', 'status':'begin'});
+
+	let next = document.getElementById("next");
+
+	next.onclick = function () {
+        console.log("in click");
+        recordLoc();
+        next.onclick = undefined;
+        psiTurk.showPage('postquestionnaire2.html');
+        psiTurk.recordTrialData({'phase':'bisbas', 'status':'begin'});
+
+        next = document.getElementById("next");
+        next.onclick = function () {
+            console.log("recording bb");
+            recordBisbas();
+            psiTurk.saveData({
+                success: function(){
+                    console.log("saved, computing b");
+                    psiTurk.computeBonus('compute_bonus', function() {
+                        console.log("completed");
+                        psiTurk.completeHIT(); // when finished saving compute bonus, the quit
+                    });
+                },
+                error: prompt_resubmit});
+            };
+        };
+
+
 };
 
 // Task object to keep track of the current phase
