@@ -64,19 +64,21 @@ var Mousetrack = function(rewards) {
 
     var createPractice = function () {
         mode = "practice";
-        trial = new Trial(document.getElementById('container'), next);
+        trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        calculate_trials(0, 0, 0, 0, 2);
+        //calculate_trials(4, 4, 4, 4, 8);
+        calculate_trials(1, 1, 1, 1, 2);
+
     };
 
     var createMain = function () {
         mode = "main";
-        trial = new Trial(document.getElementById('container'), next);
+        trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
         //calculate_trials(75, 25, 25, 50, 25);
-        calculate_trials(0, 0, 0, 0, 2);
+        calculate_trials(1, 1, 1, 1, 2);
     };
 
     var havePointerLock = 'pointerLockElement' in document ||
@@ -279,9 +281,8 @@ var Mousetrack = function(rewards) {
                     'val1':arguments[0][3],
                     'val2':arguments[0][4],
                     'presses':arguments[0][5],
-                    'mtimes':arguments[0][6],
-                    'mouse':arguments[0][7],
-                    'choice':arguments[0][8]
+                    'mouse':arguments[0][6],
+                    'choice':arguments[0][7]
                     }
                 );
                 break;
@@ -293,9 +294,8 @@ var Mousetrack = function(rewards) {
                         'val1':arguments[0][1],
                         'val2':arguments[0][2],
                         'reveal':arguments[0][3],
-                        'mtimes':arguments[0][4],
-                        'mouse':arguments[0][5],
-                        'choice':arguments[0][6],
+                        'mouse':arguments[0][4],
+                        'choice':arguments[0][5],
                     }
                 );
                 break;
@@ -307,9 +307,8 @@ var Mousetrack = function(rewards) {
                         'value':arguments[0][1],
                         'side':arguments[0][2],
                         'reveal':arguments[0][3],
-                        'mtimes':arguments[0][4],
-                        'mouse':arguments[0][5],
-                        'choice':arguments[0][6],
+                        'mouse':arguments[0][4],
+                        'choice':arguments[0][5],
                     }
                 );
                 break;
@@ -328,7 +327,7 @@ var PreQ = function(data) {
     var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
     record_responses = function() {
 
-        psiTurk.recordTrialData({'phase': 'prequestionnaire', 'status': 'submit'});
+        //psiTurk.recordTrialData({'phase': 'prequestionnaire', 'status': 'submit'});
 
         $('textarea').each(function () {
             psiTurk.recordUnstructuredData(this.id, this.value);
@@ -388,18 +387,16 @@ var Questionnaire = function() {
 
 	recordLoc = function() {
 
-		psiTurk.recordTrialData({'phase':'loc', 'status':'submit'});
+		//psiTurk.recordTrialData({'phase':'loc', 'status':'submit'});
 
 		$('input').each( function () {
             psiTurk.recordUnstructuredData(this.id, this.checked);
         });
-
-		console.log("done with loc");
 	};
 
     recordBisbas = function() {
 
-        psiTurk.recordTrialData({'phase':'bisbas', 'status':'submit'});
+        //psiTurk.recordTrialData({'phase':'bisbas', 'status':'submit'});
 
         $('select').each( function() {
             psiTurk.recordUnstructuredData(this.id, this.value);
@@ -430,7 +427,7 @@ var Questionnaire = function() {
 
 	// Load the questionnaire snippet 
 	psiTurk.showPage('postquestionnaire.html');
-	psiTurk.recordTrialData({'phase':'loc', 'status':'begin'});
+	//psiTurk.recordTrialData({'phase':'loc', 'status':'begin'});
 
 	let next = document.getElementById("next");
 
@@ -439,11 +436,10 @@ var Questionnaire = function() {
         recordLoc();
         next.onclick = undefined;
         psiTurk.showPage('postquestionnaire2.html');
-        psiTurk.recordTrialData({'phase':'bisbas', 'status':'begin'});
+        //psiTurk.recordTrialData({'phase':'bisbas', 'status':'begin'});
 
         next = document.getElementById("next");
         next.onclick = function () {
-            console.log("recording bb");
             recordBisbas();
             psiTurk.saveData({
                 success: function(){

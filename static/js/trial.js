@@ -1,12 +1,13 @@
 class Trial {
 
-  constructor(container, nextHandler, onUnlock){
+  constructor(container, nextHandler, onUnlock, interval){
     this.container = container;
     this.next = nextHandler;
     this.cursor = document.getElementById('cursor');
     this.factor = 10;
     this.unlock = onUnlock;
     this.valid = true;
+    this.interval = interval;
   }
 
   setup(onFail){
@@ -156,7 +157,13 @@ class Trial {
     var _myself = this;
     document.addEventListener("click", this.checkClicks);
     document.addEventListener("mousemove", this.border);
-    document.addEventListener("mousemove", this.mouseRecord);
+    //document.addEventListener("mousemove", this.mouseRecord);
+
+    this.mouserecorder = setInterval(function(){
+      let trial = getTrial();
+      trial.mouse.push({"x": trial.cursor.style.left, "y": trial.cursor.style.top});
+    }, this.interval);
+
 
     this.timer = setTimeout(function(){
       _myself.finish();
@@ -198,12 +205,13 @@ class Trial {
     this.cursor.style.display = "none";
 
     clearTimeout(this.timer);
+    clearInterval(this.mouserecorder);
     document.removeEventListener("mousemove", this.mouseRecord);
     document.removeEventListener("click", this.checkClicks);
     document.removeEventListener("mousemove", this.border);
 
     var ret = this.ret;
-    ret.push(this.mtimes, this.mouse, this.choice);
+    ret.push(this.mouse, this.choice);
 
     showMessage(this, "You won: $" + parseFloat(this.choice).toFixed(2), "white", false,
         function(){ this.next(ret);  }.bind(this), 3000);

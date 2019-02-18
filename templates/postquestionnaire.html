@@ -23,7 +23,7 @@
                         data = data.split("\n");
                         for (let i = 1; i <= data.length; i += 2){
                             let j = ((i+1)/2 | 0); // 1 1 2 2 ...
-                            form.append(j + ".<br><input type='radio' name='" + j + "' id='loc'" + j + "a'>" + data[i-1] + "<br>" +
+                            form.append(j + ".<br><input type='radio' name='" + j + "' id='loc" + j + "a'>" + data[i-1] + "<br>" +
                             "<input type='radio' name='" + j + "' id='loc" + j + "b'>" + data[i] + "<br>");
                         }
                     },
