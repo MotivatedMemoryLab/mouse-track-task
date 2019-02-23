@@ -7,10 +7,6 @@
 // Initalize psiturk object
 var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode);
 
-var mycondition = condition;  // these two variables are passed by the psiturk server process
-var mycounterbalance = counterbalance;  // they tell you which condition you have been assigned to
-// they are not used in the stroop code but may be useful to you
-
 // All pages to be loaded
 var pages = [
 	"instructions/instruct-1.html",
@@ -115,7 +111,7 @@ var Mousetrack = function(rewards) {
 
                 document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
                 document.onpointerlockchange = undefined;
-                currentview = new Questionnaire();
+                Questionnaire();
             }
         )
     };
@@ -263,7 +259,7 @@ var Mousetrack = function(rewards) {
             } else if (mode === "main") {
                 document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
                 document.onpointerlockchange = undefined;
-                currentview = new Questionnaire();
+                Questionnaire();
             }
         }
     }
@@ -323,9 +319,8 @@ var Mousetrack = function(rewards) {
 * Questionnaire *
 ****************/
 
-var PreQ = function(data) {
-    var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
-    record_responses = function() {
+var PreQ = function() {
+   record_responses = function() {
 
         //psiTurk.recordTrialData({'phase': 'prequestionnaire', 'status': 'submit'});
 
@@ -338,45 +333,41 @@ var PreQ = function(data) {
         $('select').each(function () {
             psiTurk.recordUnstructuredData(this.id, this.value);
         });
-    };
 
-    let  time = -1;
-
-    prompt_resubmit = function () {
-        if (time >= 0) {
-            clearTimeout(time);
-            time = -1;
+        if(parseInt(document.getElementById("age").value) > new Date().getFullYear()-17 ||
+           parseInt(document.getElementById("age").value) < new Date().getFullYear()-46 ){
+            window.location.replace("/ineligible?uniqueId="+uniqueId);
         }
-        document.body.innerHTML = error_message;
-        $("#resubmit").click(resubmit);
     };
-
-    resubmit = function() {
-        document.body.innerHTML = "<h1>Trying to resubmit...</h1>";
-        time = setTimeout(prompt_resubmit, 10000);
-
-        psiTurk.saveData({
-            success: function() {
-                clearInterval(time);
-                currentview = new Mousetrack(data);
-            },
-            error: prompt_resubmit
-        });
-    };
-
-
 
     // Load the questionnaire snippet
     psiTurk.showPage('prequestionnaire.html');
     psiTurk.recordTrialData({'phase':'prequestionnaire', 'status':'begin'});
 
     $("#next").click(function () {
+
         record_responses();
-        psiTurk.saveData({
-            success: function(){
-                currentview = new Mousetrack(data);
-            },
-            error: prompt_resubmit});
+
+        psiTurk.doInstructions(
+            instructionPages, // a list of pages you want to display in sequence
+            function() {
+                $(document).ready(function () {
+                    $.ajax({
+                        type: "GET",
+                        url: "static/resources/chances.csv",
+                        dataType: "text",
+                        success: function (data) {
+                            Mousetrack(data);  // what you want to do when you are done with instructions
+                        },
+                        error: function (req, status, error) {
+                            $("body").html("<p>" + error + "</p>");
+                        }
+                    });
+                });
+
+            }
+
+        );
     });
 
 };
@@ -432,7 +423,6 @@ var Questionnaire = function() {
 	let next = document.getElementById("next");
 
 	next.onclick = function () {
-        console.log("in click");
         recordLoc();
         next.onclick = undefined;
         psiTurk.showPage('postquestionnaire2.html');
@@ -443,9 +433,7 @@ var Questionnaire = function() {
             recordBisbas();
             psiTurk.saveData({
                 success: function(){
-                    console.log("saved, computing b");
                     psiTurk.computeBonus('compute_bonus', function() {
-                        console.log("completed");
                         psiTurk.completeHIT(); // when finished saving compute bonus, the quit
                     });
                 },
@@ -456,32 +444,10 @@ var Questionnaire = function() {
 
 };
 
-// Task object to keep track of the current phase
-var currentview;
-
 /*******************
  * Run Task
  ******************/
 
 $(window).load( function(){
-    psiTurk.doInstructions(
-        instructionPages, // a list of pages you want to display in sequence
-        function() {
-            $(document).ready(function () {
-                $.ajax({
-                    type: "GET",
-                    url: "static/resources/chances.csv",
-                    dataType: "text",
-                    success: function (data) {
-                        currentview = new PreQ(data);  // what you want to do when you are done with instructions
-                    },
-                    error: function (req, status, error) {
-                        $("body").html("<p>" + error + "</p>");
-                    }
-                });
-            });
-
-        }
-
-    );
+    PreQ();
 });
