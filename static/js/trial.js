@@ -53,7 +53,7 @@ class Trial {
 
     this.cursor.style.display = "none";
     this.ret = ["press", num, duration, val1, val2];
-    showMessage(this, "Double: Press", "red", false, doPress);
+    showMessage(this, "Press", "red", false, doPress);
 
   }
 
@@ -79,7 +79,7 @@ class Trial {
     this.cursor.style.display = "none";
     this.ret = ["double", val1, val2, reveal];
 
-    showMessage(this, "Double: Blank", "gray", false, runDouble);
+    showMessage(this, "Double", "gray", false, runDouble);
 
   }
 

@@ -53,6 +53,7 @@ var Mousetrack = function(rewards) {
 
     var trial = null;
     var trials = null;
+    var trial_num = 0;
     var mode = "practice";
 
     rewards = rewards.split("\n").map(function(row){return row.split(",");});
@@ -60,6 +61,7 @@ var Mousetrack = function(rewards) {
 
     var createPractice = function () {
         mode = "practice";
+        trial_num = 0;
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
@@ -70,6 +72,7 @@ var Mousetrack = function(rewards) {
 
     var createMain = function () {
         mode = "main";
+        trial_num = 0;
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
@@ -106,7 +109,8 @@ var Mousetrack = function(rewards) {
             "this hit, but will not be awarded a bonus. Please click to continue.", "white",     true,
             function(){
                 psiTurk.recordTrialData({
-                    'phase':'exit'
+                    'phase':'exit',
+                    'trial_num':trial_num
                 });
 
                 document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
@@ -229,6 +233,7 @@ var Mousetrack = function(rewards) {
 
     function startTrial(){
         if(trials.length > 0){
+            trial_num++;
             var info = trials.shift();
             switch(String(info[0])){
                 case "double":
@@ -271,6 +276,7 @@ var Mousetrack = function(rewards) {
                 psiTurk.recordTrialData({
                     'phase': "trial",
                     'trial':"press",
+                    'trial_num': trial_num,
                     'mode':mode,
                     'num':arguments[0][1],
                     'duration':arguments[0][2],
@@ -286,6 +292,7 @@ var Mousetrack = function(rewards) {
                 psiTurk.recordTrialData({
                         'phase': "trial",
                         'trial':"double",
+                        'trial_num': trial_num,
                         'mode':mode,
                         'val1':arguments[0][1],
                         'val2':arguments[0][2],
@@ -299,6 +306,7 @@ var Mousetrack = function(rewards) {
                 psiTurk.recordTrialData({
                         'phase': "trial",
                         'trial':"single",
+                        'trial_num': trial_num,
                         'mode':mode,
                         'value':arguments[0][1],
                         'side':arguments[0][2],
