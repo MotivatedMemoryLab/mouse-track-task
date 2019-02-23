@@ -54,6 +54,7 @@ var Mousetrack = function(rewards) {
     var trial = null;
     var trials = null;
     var trial_num = 0;
+    var reward_trials = [];
     var mode = "practice";
 
     rewards = rewards.split("\n").map(function(row){return row.split(",");});
@@ -65,19 +66,19 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        //calculate_trials(4, 4, 4, 4, 8);
-        calculate_trials(1, 1, 1, 1, 2);
-
+        calculate_trials(4, 4, 4, 4, 8);
     };
 
     var createMain = function () {
         mode = "main";
         trial_num = 0;
+        reward_trials = [...Array(175).keys()];
+        reward_trials = reward_trials.sort();
+        reward_trials = reward_trials.slice(0, 10);
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        //calculate_trials(75, 25, 25, 50, 25);
-        calculate_trials(1, 1, 1, 1, 2);
+        calculate_trials(75, 25, 25, 50, 25);
     };
 
     var havePointerLock = 'pointerLockElement' in document ||
@@ -271,11 +272,14 @@ var Mousetrack = function(rewards) {
 
     function next(){
 
+        let included = mode === "main" && reward_trials.includes(trial_num);
+
         switch(arguments[0][0]){
             case "press":
                 psiTurk.recordTrialData({
                     'phase': "trial",
                     'trial':"press",
+                    'included':included,
                     'trial_num': trial_num,
                     'mode':mode,
                     'num':arguments[0][1],
@@ -290,29 +294,31 @@ var Mousetrack = function(rewards) {
                 break;
             case "double":
                 psiTurk.recordTrialData({
-                        'phase': "trial",
-                        'trial':"double",
-                        'trial_num': trial_num,
-                        'mode':mode,
-                        'val1':arguments[0][1],
-                        'val2':arguments[0][2],
-                        'reveal':arguments[0][3],
-                        'mouse':arguments[0][4],
-                        'choice':arguments[0][5],
+                    'phase': "trial",
+                    'trial':"double",
+                    'included':included,
+                    'trial_num': trial_num,
+                    'mode':mode,
+                    'val1':arguments[0][1],
+                    'val2':arguments[0][2],
+                    'reveal':arguments[0][3],
+                    'mouse':arguments[0][4],
+                    'choice':arguments[0][5],
                     }
                 );
                 break;
             case "single":
                 psiTurk.recordTrialData({
-                        'phase': "trial",
-                        'trial':"single",
-                        'trial_num': trial_num,
-                        'mode':mode,
-                        'value':arguments[0][1],
-                        'side':arguments[0][2],
-                        'reveal':arguments[0][3],
-                        'mouse':arguments[0][4],
-                        'choice':arguments[0][5],
+                    'phase': "trial",
+                    'trial':"single",
+                    'included':included,
+                    'trial_num': trial_num,
+                    'mode':mode,
+                    'value':arguments[0][1],
+                    'side':arguments[0][2],
+                    'reveal':arguments[0][3],
+                    'mouse':arguments[0][4],
+                    'choice':arguments[0][5],
                     }
                 );
                 break;

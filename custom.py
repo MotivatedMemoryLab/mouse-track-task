@@ -97,7 +97,7 @@ def compute_bonus():
 
     for record in user_data['data']:  # for line in data file
         trial = record['trialdata']
-        if trial['phase'] == 'trial':
+        if trial['phase'] == 'trial' and trial['included']:
             bonus += float(trial['choice'])
         elif trial['phase'] == 'exit':
             bonus = 0
