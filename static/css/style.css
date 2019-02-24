@@ -68,6 +68,16 @@ h1 {
   line-height: 1.1em;
 }
 
+.instr-head {
+    float: left;
+    font-size: 1.6em;
+}
+
+.instr-page-num {
+    float: right;
+    margin: 10px 20px 0 0;
+}
+
 #trial {
   margin: 0 auto;
   width: 800px;

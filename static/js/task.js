@@ -39,6 +39,7 @@ var instructionPages = [ // add as a list as many pages as you like
 *
 ********************/
 
+var bonus = 0;
 var Mousetrack = function(rewards) {
     // Load the stage.html snippet into the body of the page
     psiTurk.showPage('stage.html');
@@ -276,6 +277,9 @@ var Mousetrack = function(rewards) {
 
         switch(arguments[0][0]){
             case "press":
+                if (included) {
+                    bonus += arguments[0][7];
+                }
                 psiTurk.recordTrialData({
                     'phase': "trial",
                     'trial':"press",
@@ -293,6 +297,9 @@ var Mousetrack = function(rewards) {
                 );
                 break;
             case "double":
+                if (included) {
+                    bonus += arguments[0][5];
+                }
                 psiTurk.recordTrialData({
                     'phase': "trial",
                     'trial':"double",
@@ -308,6 +315,9 @@ var Mousetrack = function(rewards) {
                 );
                 break;
             case "single":
+                if (included) {
+                    bonus += arguments[0][5];
+                }
                 psiTurk.recordTrialData({
                     'phase': "trial",
                     'trial':"single",
@@ -423,6 +433,8 @@ var Questionnaire = function() {
 			success: function() {
 			    clearInterval(reprompt); 
                 psiTurk.computeBonus('compute_bonus', function(){
+                    bonus = d3.format(".2f")(bonus);
+                    alert("Your bonus is $" + bonus + ". After verification, it will be send within 5 working days.");
                 	psiTurk.completeHIT(); // when finished saving compute bonus, then quit
                 });
 			}, 
