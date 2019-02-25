@@ -45,7 +45,7 @@ def handle_ineligible(exception):
 @custom_code.route('/ineligible')
 def ineligible():
     current_app.logger.info("Participant ineligible")  # Print message to server.log for debugging
-    raise IneligibilityError(request)
+    raise IneligibilityError()
 
 
 # ----------------------------------------------

@@ -40,9 +40,13 @@ var instructionPages = [ // add as a list as many pages as you like
 ********************/
 
 var bonus = 0;
+var reward_trials = [];
 var Mousetrack = function(rewards) {
     // Load the stage.html snippet into the body of the page
     psiTurk.showPage('stage.html');
+
+    psiTurk.recordUnstructuredData("screen_x", screen.width);
+    psiTurk.recordUnstructuredData("screen_y", screen.height);
 
     window.moveTo(0, 0);
     window.resizeTo(screen.width, screen.height);
@@ -52,10 +56,11 @@ var Mousetrack = function(rewards) {
     });
     */
 
+
     var trial = null;
     var trials = null;
     var trial_num = 0;
-    var reward_trials = [];
+    reward_trials = [];
     var mode = "practice";
 
     rewards = rewards.split("\n").map(function(row){return row.split(",");});
@@ -67,19 +72,23 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        calculate_trials(4, 4, 4, 4, 8);
+        calculate_trials(1, 1, 1, 1, 2);
+        //calculate_trials(4, 4, 4, 4, 8);
     };
 
     var createMain = function () {
         mode = "main";
         trial_num = 0;
-        reward_trials = [...Array(175).keys()];
+        reward_trials = [...Array(4).keys()];
+        reward_trials = reward_trials.slice(1);
+        shuffleArray(reward_trials);
+        reward_trials = reward_trials.slice(0, 2);
         reward_trials = reward_trials.sort();
-        reward_trials = reward_trials.slice(0, 10);
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        calculate_trials(75, 25, 25, 50, 25);
+        calculate_trials(1, 1, 1, 1, 2);
+        // calculate_trials(75, 25, 25, 50, 25);
     };
 
     var havePointerLock = 'pointerLockElement' in document ||
@@ -248,6 +257,7 @@ var Mousetrack = function(rewards) {
                     trial.press(info[1], info[2], info[3], info[4], info[5]);
                     break;
                 case "break":
+                    trial_num--;
                     trial.unlock = getCursor;
                     showMessage(trial, "Take a break. Click to continue.", "white", true, function(){
                         trial.setup(restart);
@@ -262,10 +272,12 @@ var Mousetrack = function(rewards) {
                 trial.setup(Function);
                 document.exitPointerLock();
                 mode = "main";
+                document.getElementById("cursor").style.top = "0";
                 showStart("You are about to start the main experiment. You must finish completely without exiting for your results to be counted.")
             } else if (mode === "main") {
                 document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
                 document.onpointerlockchange = undefined;
+                document.exitPointerLock();
                 Questionnaire();
             }
         }
@@ -346,6 +358,11 @@ var Mousetrack = function(rewards) {
 var PreQ = function() {
    record_responses = function() {
 
+       if(document.getElementById("age").value === "" || document.getElementById("cursor_sel").value === ""){
+           alert("Please fill out the form before continuing.");
+           return false;
+       }
+
         //psiTurk.recordTrialData({'phase': 'prequestionnaire', 'status': 'submit'});
 
         $('textarea').each(function () {
@@ -361,7 +378,10 @@ var PreQ = function() {
         if(parseInt(document.getElementById("age").value) > new Date().getFullYear()-17 ||
            parseInt(document.getElementById("age").value) < new Date().getFullYear()-46 ){
             window.location.replace("/ineligible?uniqueId="+uniqueId);
+            return false;
         }
+
+        return true;
     };
 
     // Load the questionnaire snippet
@@ -370,28 +390,29 @@ var PreQ = function() {
 
     $("#next").click(function () {
 
-        record_responses();
-
-        psiTurk.doInstructions(
-            instructionPages, // a list of pages you want to display in sequence
-            function() {
-                $(document).ready(function () {
-                    $.ajax({
-                        type: "GET",
-                        url: "static/resources/chances.csv",
-                        dataType: "text",
-                        success: function (data) {
-                            Mousetrack(data);  // what you want to do when you are done with instructions
-                        },
-                        error: function (req, status, error) {
-                            $("body").html("<p>" + error + "</p>");
-                        }
+        if(record_responses()){
+            psiTurk.doInstructions(
+                instructionPages, // a list of pages you want to display in sequence
+                function() {
+                    $(document).ready(function () {
+                        $.ajax({
+                            type: "GET",
+                            url: "static/resources/chances.csv",
+                            dataType: "text",
+                            success: function (data) {
+                                Mousetrack(data);  // what you want to do when you are done with instructions
+                            },
+                            error: function (req, status, error) {
+                                $("body").html("<p>" + error + "</p>");
+                            }
+                        });
                     });
-                });
 
-            }
+                }
 
-        );
+            );
+        }
+
     });
 
 };
@@ -460,6 +481,8 @@ var Questionnaire = function() {
             psiTurk.saveData({
                 success: function(){
                     psiTurk.computeBonus('compute_bonus', function() {
+                        bonus = d3.format(".2f")(bonus);
+                        alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
                         psiTurk.completeHIT(); // when finished saving compute bonus, the quit
                     });
                 },
