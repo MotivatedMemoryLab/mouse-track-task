@@ -72,8 +72,8 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        calculate_trials(1, 1, 1, 1, 2);
-        //calculate_trials(4, 4, 4, 4, 8);
+        //calculate_trials(1, 1, 1, 1, 2);
+        calculate_trials(4, 4, 4, 4, 8);
     };
 
     var createMain = function () {
@@ -87,8 +87,8 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        calculate_trials(1, 1, 1, 1, 2);
-        // calculate_trials(75, 25, 25, 50, 25);
+        //calculate_trials(1, 1, 1, 1, 2);
+        calculate_trials(75, 25, 25, 50, 25);
     };
 
     var havePointerLock = 'pointerLockElement' in document ||
@@ -169,10 +169,10 @@ var Mousetrack = function(rewards) {
             }
             return ret
         };
-        const press_row = 15;
-        const left_solo_row = 16;
-        const right_solo_row = 17;
-        const guess_row = 18;
+        const press_row = 0;
+        const left_solo_row = 1;
+        const right_solo_row = 2;
+        const guess_row = 3;
         const break_trial = -1;
 
         arr.push.apply(arr, expand(press_row, num_press));
@@ -189,12 +189,12 @@ var Mousetrack = function(rewards) {
         const key = "spacebar";
         const time = 2000;
 
-        const label_left_dual = 1;
-        const label_right_dual = 2;
-        const label_left_solo = 3;
-        const label_right_solo = 4;
-        const label_left_dual_guess = 5;
-        const label_right_dual_guess = 6;
+        const label_left_dual = 4;
+        const label_right_dual = 5;
+        const label_left_solo = 6;
+        const label_right_solo = 7;
+        const label_left_dual_guess = 8;
+        const label_right_dual_guess = 9;
 
         var tick_press = 0;
         var tick_left_solo = 0;
@@ -210,7 +210,7 @@ var Mousetrack = function(rewards) {
         for(var j = 0; j < arr.length; j++){
             switch (arr[j]){
                 case press_row:
-                    pushTrial("press", key, randi(7, 12), time, rewards[label_left_dual][tick_press], rewards[label_right_dual][tick_press]);
+                    pushTrial("press", key, randi(7, 15), time, rewards[label_left_dual][tick_press], rewards[label_right_dual][tick_press]);
                     tick_press += 1;
                     break;
 
@@ -397,7 +397,7 @@ var PreQ = function() {
                     $(document).ready(function () {
                         $.ajax({
                             type: "GET",
-                            url: "static/resources/chances.csv",
+                            url: "static/resources/values.csv",
                             dataType: "text",
                             success: function (data) {
                                 Mousetrack(data);  // what you want to do when you are done with instructions
