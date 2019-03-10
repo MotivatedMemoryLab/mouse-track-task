@@ -72,22 +72,20 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        //calculate_trials(1, 1, 1, 1, 2);
         calculate_trials(4, 4, 4, 4, 8);
     };
 
     var createMain = function () {
         mode = "main";
         trial_num = 0;
-        reward_trials = [...Array(4).keys()];
+        reward_trials = [...Array(176).keys()];
         reward_trials = reward_trials.slice(1);
         shuffleArray(reward_trials);
-        reward_trials = reward_trials.slice(0, 2);
+        reward_trials = reward_trials.slice(0, 10);
         reward_trials = reward_trials.sort();
-        trial = new Trial(document.getElementById('container'), next, 10);
+        trial = new Trial(document.getElementById('container'), next, 10); // the number at the end refers to # milliseconds between mouse position recordings
         setTrial(trial);
         trials = [];
-        //calculate_trials(1, 1, 1, 1, 2);
         calculate_trials(75, 25, 25, 50, 25);
     };
 
@@ -257,6 +255,7 @@ var Mousetrack = function(rewards) {
                     trial.press(info[1], info[2], info[3], info[4], info[5]);
                     break;
                 case "break":
+                    psiTurk.recordUnstructuredData('break', trial_num);
                     trial_num--;
                     trial.unlock = getCursor;
                     showMessage(trial, "Take a break. Click to continue.", "white", true, function(){
@@ -290,7 +289,7 @@ var Mousetrack = function(rewards) {
         switch(arguments[0][0]){
             case "press":
                 if (included) {
-                    bonus += arguments[0][7];
+                    bonus += parseFloat(arguments[0][7]);
                 }
                 psiTurk.recordTrialData({
                     'phase': "trial",
@@ -310,7 +309,7 @@ var Mousetrack = function(rewards) {
                 break;
             case "double":
                 if (included) {
-                    bonus += arguments[0][5];
+                    bonus += parseFloat(arguments[0][5]);
                 }
                 psiTurk.recordTrialData({
                     'phase': "trial",
@@ -328,7 +327,7 @@ var Mousetrack = function(rewards) {
                 break;
             case "single":
                 if (included) {
-                    bonus += arguments[0][5];
+                    bonus += parseFloat(arguments[0][5]);
                 }
                 psiTurk.recordTrialData({
                     'phase': "trial",

@@ -213,7 +213,7 @@ class Trial {
     var ret = this.ret;
     ret.push(this.mouse, this.choice);
 
-    showMessage(this, "You won: $" + parseFloat(this.choice).toFixed(2), "white", false,
+    showMessage(this, "Value: $" + parseFloat(this.choice).toFixed(2), "white", false,
         function(){ this.next(ret);  }.bind(this), 3000);
   }
 
