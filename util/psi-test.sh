@@ -6,5 +6,11 @@ if ! screen -list | grep -q exp; then     # run bash script
 fi
 
 screen -S exp -p 0 -X stuff "util/restart-debug.sh$(echo -ne '\r')"
-echo "Server started."
 
+while psiturk -e status | grep -q off
+do
+	echo "Waiting..."
+    sleep 1
+done
+
+echo "Server on."

@@ -3,5 +3,5 @@ psiturk -e "mode sandbox"
 psiturk -e "hit expire --all"
 psiturk -e "hit dispose --all"
 psiturk -e "server on"
-psiturk -e "hit create 1 1.00 1"
+psiturk -e "hit create 20 0.50 1"
 exit
