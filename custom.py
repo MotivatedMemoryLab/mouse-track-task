@@ -3,7 +3,7 @@
 from flask import Blueprint, render_template, request, jsonify, Response, abort, current_app
 from jinja2 import TemplateNotFound
 from functools import wraps
-from sqlalchemy import or_
+from sqlalchemy import exc
 
 from psiturk.psiturk_config import PsiturkConfig
 from psiturk.experiment_errors import ExperimentError, InvalidUsage
@@ -33,18 +33,19 @@ def handle_ineligible(exception):
     return exception.error_page(request, config.get('HIT Configuration',
                                                     'contact_email_on_error'))
 
-
-###########################################################
-#  serving warm, fresh, & sweet custom, user-provided routes
-#  add them here
-###########################################################
-
-# ----------------------------------------------
-# example custom route
-# ----------------------------------------------
 @custom_code.route('/ineligible')
 def ineligible():
-    current_app.logger.info("Participant ineligible")  # Print message to server.log for debugging
+    current_app.logger.info("Participant ineligible")
+    try:
+        unique_id = request.args['uniqueId']
+        current_app.logger.info("Marking ineligible %s" % unique_id)
+        user = Participant.query. \
+            filter(Participant.uniqueid == unique_id).one()
+        user.status = 8 # INELIGIBLE
+        db_session.add(user)
+        db_session.commit()
+    except exc.SQLAlchemyError:
+        raise ExperimentError('tried_to_quit')
     raise IneligibilityError()
 
 
@@ -85,12 +86,13 @@ def compute_bonus():
     if not request.args.has_key('uniqueId'):
         raise ExperimentError(
             'improper_inputs')  # i don't like returning HTML to JSON requests...  maybe should change this
-    uniqueId = request.args['uniqueId']
+    unique_id = request.args['uniqueId']
 
     # try:
     # lookup user in database
+    # in order to check for IP address violations get the user this way and then check for user.ipaddress
     user = Participant.query. \
-        filter(Participant.uniqueid == uniqueId). \
+        filter(Participant.uniqueid == unique_id). \
         one()
     user_data = loads(user.datastring)  # load datastring from JSON
     bonus = 0
