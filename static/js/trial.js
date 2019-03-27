@@ -53,42 +53,49 @@ class Trial {
 
     this.cursor.style.display = "none";
     this.ret = ["press", num, duration, val1, val2];
-    showMessage(this, "Press", "red", false, doPress);
+    this.countdown("Press", "black", 3, 700, doPress);
 
   }
 
   single(val, side, reveal = true){
     var doSingle = function(){
       container.innerHTML = "";
-      this.createClickArea(side, val, reveal, "single");
+      this.createClickArea(side, val, reveal);
       //this.addStart();
       this.runTrial()
     };
 
     this.cursor.style.display = "none";
     this.ret = ["single", val, side, reveal];
-    
-    showMessage(this, "Single", "blue", false, doSingle);
+
+    this.countdown("Single", "black", 3, 700, doSingle);
   }
 
   double(val1, val2, reveal = true){
     var runDouble = function(){
-      this.doDouble(val1, val2, reveal, "guess");
+      this.doDouble(val1, val2, reveal);
     };
 
     this.cursor.style.display = "none";
     this.ret = ["double", val1, val2, reveal];
 
-    showMessage(this, "Double", "gray", false, runDouble);
+    this.countdown("Double", "black", 3, 700, runDouble);
 
   }
 
 
   //-----------------------SUPPOSED TO BE PRIVATE-----------------------//
-  doDouble(val1, val2, reveal, type){
+  countdown(message, color, start, duration, callback){
+    if(start <= 1){
+      showMessage(this, message + " in " + start, color, false, callback, duration)
+    } else
+      showMessage(this, message + " in " + start, color, false, function(){this.countdown(message, color, start - 1, duration, callback)}, duration)
+  }
+
+  doDouble(val1, val2, reveal){
     this.container.innerHTML = "";
-    this.createClickArea("left", val1, reveal, type);
-    this.createClickArea("right", val2, reveal, type);
+    this.createClickArea("left", val1, reveal);
+    this.createClickArea("right", val2, reveal);
 
     this.runTrial()
   }
@@ -170,17 +177,14 @@ class Trial {
     }, 5000);
   }
 
-  createClickArea(gravity, cash, reveal, type){
+  createClickArea(gravity, cash, reveal){
     var div = document.createElement("DIV");
     div.className = "clickarea";
     div.cash = cash;
     div.style.float = gravity;
 
     if(reveal){
-      if(type === "double")
-        var rgb = "#" + (Math.round(255*cash)).toString(16) + "0000";
-      else
-        var rgb = "#0000" + (Math.round(255*cash)).toString(16);
+      var rgb = "#" + (Math.round(255*cash)).toString(16) + "0000";
       div.style.background = rgb;
     }
     div.style.borderColor = div.style.backgroundColor;
@@ -213,8 +217,8 @@ class Trial {
     var ret = this.ret;
     ret.push(this.mouse, this.choice);
 
-    showMessage(this, "Value: $" + parseFloat(this.choice).toFixed(2), "white", false,
-        function(){ this.next(ret);  }.bind(this), 3000);
+    showMessage(this, "Value: $" + parseFloat(this.choice).toFixed(2), "black", false,
+        function(){ this.next(ret);  }.bind(this), 1500);
   }
 
 }

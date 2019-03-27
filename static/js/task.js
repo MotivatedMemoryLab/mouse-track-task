@@ -115,7 +115,7 @@ var Mousetrack = function(rewards) {
     var exit = function(){
         showMessage(this, "You have unlocked the cursor during the main experiment, " +
             "and unfortunately you cannot continue. You will still be able to complete " +
-            "this hit, but will not be awarded a bonus. Please click to continue.", "white",     true,
+            "this hit, but will not be awarded a bonus. Please click to continue.", "black",     true,
             function(){
                 psiTurk.recordTrialData({
                     'phase':'exit',
@@ -143,7 +143,7 @@ var Mousetrack = function(rewards) {
                 startExp.style.visibility = "hidden";
             }
         });
-        showMessage(trial, message, "white", true,
+        showMessage(trial, message, "black", true,
             function(){
                 trial.unlock = getCursor;
             });
@@ -155,7 +155,7 @@ var Mousetrack = function(rewards) {
             "Click and read the cursor prompt to begin.");
 
     } else {
-        showMessage(trial, "Cannot replace the mouse cursor, please try another browser.", 'white', false, Function);
+        showMessage(trial, "Cannot replace the mouse cursor, please try another browser.", 'black', false, Function);
     }
 
     function calculate_trials(num_press, num_left_solo, num_right_solo, num_guess, break_threshold){
@@ -258,7 +258,7 @@ var Mousetrack = function(rewards) {
                     psiTurk.recordUnstructuredData('break', trial_num);
                     trial_num--;
                     trial.unlock = getCursor;
-                    showMessage(trial, "Take a break. Click to continue.", "white", true, function(){
+                    showMessage(trial, "Take a break. Click to continue.", "black", true, function(){
                         trial.setup(restart);
                         trial.valid = true;
                         startTrial();
@@ -368,7 +368,10 @@ var PreQ = function() {
             psiTurk.recordUnstructuredData(this.id, this.value);
         });
         $('input').each(function () {
-            psiTurk.recordUnstructuredData(this.id, this.value);
+            if(this.type === "checkbox")
+                psiTurk.recordUnstructuredData(this.id, this.checked);
+            else
+                psiTurk.recordUnstructuredData(this.id, this.value);
         });
         $('select').each(function () {
             psiTurk.recordUnstructuredData(this.id, this.value);
@@ -376,9 +379,17 @@ var PreQ = function() {
 
         if(parseInt(document.getElementById("age").value) > new Date().getFullYear()-17 ||
            parseInt(document.getElementById("age").value) < new Date().getFullYear()-46 ){
+            psiTurk.recordUnstructuredData("ineligibility", "age: " + document.getElementById("age").value);
             window.location.replace("/ineligible?uniqueId="+uniqueId);
             return false;
         }
+
+
+       if(document.getElementById("cursor_sel").value !== "leftmouse" && document.getElementById("cursor_sel").value !== "rightmouse"){
+           psiTurk.recordUnstructuredData("ineligibility", "mouse: " + document.getElementById("cursor_sel").value);
+           window.location.replace("/ineligible?uniqueId="+uniqueId);
+           return false;
+       }
 
         return true;
     };

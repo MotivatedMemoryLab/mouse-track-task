@@ -9,9 +9,9 @@ function assert(exp, message) {
 	}
 }
 
-function showMessage(trial, message, color, waitClick, callback){
+function showMessage(trial, message, color, waitClick, callback, duration = 2000){
     var container = document.getElementById("container");
-    document.getElementsByTagName("BODY")[0].style.backgroundColor = 'rgb(90, 90, 90)';
+    document.getElementsByTagName("BODY")[0].style.backgroundColor = 'rgb(200, 200, 200)';
     container.innerHTML = '<div id="ready" style="color: ' + color + '"></div>';
     var ready = document.getElementById("ready");
     ready.style.fontSize = "30px";
@@ -23,7 +23,7 @@ function showMessage(trial, message, color, waitClick, callback){
         };
         document.addEventListener("click", clicked, false);
     } else {
-        setTimeout(function(){if (trial.valid) callback.call(trial)}, 2000)
+        setTimeout(function(){if (trial.valid) callback.call(trial)}, duration)
     }
 }
 
