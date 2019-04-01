@@ -47,6 +47,21 @@ var Mousetrack = function(rewards) {
 
     psiTurk.recordUnstructuredData("screen_x", screen.width);
     psiTurk.recordUnstructuredData("screen_y", screen.height);
+    let gamut = "none";
+    if (window.matchMedia("(color-gamut: srgb)").matches) {
+        gamut = "srgb";
+    }
+
+    if (window.matchMedia("(color-gamut: p3)").matches) {
+        gamut = "p3";
+    }
+
+    if (window.matchMedia("(color-gamut: rec2020)").matches) {
+        gamut = "rec2020";
+    }
+
+    psiTurk.recordUnstructuredData("color-gamut", gamut);
+    psiTurk.recordUnstructuredData("color-depth", window.screen.colorDepth);
 
     window.moveTo(0, 0);
     window.resizeTo(screen.width, screen.height);
@@ -427,6 +442,8 @@ var PreQ = function() {
 
 };
 
+let q = 1;
+
 var Questionnaire = function() {
 
 	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
@@ -440,7 +457,7 @@ var Questionnaire = function() {
         });
 	};
 
-    recordBisbas = function() {
+    recordBisbasMtq = function() {
 
         //psiTurk.recordTrialData({'phase':'bisbas', 'status':'submit'});
 
@@ -480,27 +497,29 @@ var Questionnaire = function() {
 	let next = document.getElementById("next");
 
 	next.onclick = function () {
-        recordLoc();
-        next.onclick = undefined;
-        psiTurk.showPage('postquestionnaire2.html');
-        //psiTurk.recordTrialData({'phase':'bisbas', 'status':'begin'});
+	    if(q === 1) {
+            recordLoc();
+            psiTurk.showPage('postquestionnaire2.html');
+            q++;
+        } else if(q === 2){
+	        recordBisbasMtq();
+            psiTurk.showPage('postquestionnaire3.html');
 
-        next = document.getElementById("next");
-        next.onclick = function () {
-            recordBisbas();
-            psiTurk.saveData({
-                success: function(){
-                    psiTurk.computeBonus('compute_bonus', function() {
-                        bonus = d3.format(".2f")(bonus);
-                        alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
-                        psiTurk.completeHIT(); // when finished saving compute bonus, the quit
-                    });
-                },
-                error: prompt_resubmit});
+            next = document.getElementById("next");
+            next.onclick = function () {
+                recordBisbasMtq();
+                psiTurk.saveData({
+                    success: function(){
+                        psiTurk.computeBonus('compute_bonus', function() {
+                            bonus = d3.format(".2f")(bonus);
+                            alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
+                            psiTurk.completeHIT(); // when finished saving compute bonus, the quit
+                        });
+                    },
+                    error: prompt_resubmit});
             };
-        };
-
-
+        }
+    }
 };
 
 /*******************
