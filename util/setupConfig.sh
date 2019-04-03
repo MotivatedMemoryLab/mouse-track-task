@@ -8,12 +8,12 @@ if [ -r util/dbcreds ]; then
 
 	port=31420
 
-	while netstat -al | grep  $port | grep "*.*" | grep -q TIME_WAIT ; do
+	while netstat -tl | grep  $port | grep -q TIME_WAIT ; do
         echo "Waiting for port to open..."
         sleep 10
     done
 
-	while netstat -al | grep $port | grep -q LISTEN ; do
+	while netstat -tl | grep $port | grep -q LISTEN ; do
 		let port=port+1
 	done
 

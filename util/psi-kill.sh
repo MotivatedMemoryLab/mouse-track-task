@@ -3,11 +3,15 @@ if screen -list | grep -q exp; then     # run bash script
 	echo "Exiting Psiturk Server..."
 fi
 
-while psiturk -e status | grep -q blocked
-do
-	echo "Waiting..."
-    sleep 1
-done
+if netstat -tlp 2>/dev/null | grep -q gunicorn; then
+    while psiturk -e status | grep -q blocked
+    do
+        echo "Waiting..."
+        sleep 1
+    done
 
-screen -S exp -X quit
-echo "Exited."
+    screen -S exp -X quit
+    echo "Exited."
+
+fi
+
