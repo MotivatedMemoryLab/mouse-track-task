@@ -16,7 +16,8 @@ var pages = [
     "prequestionnaire.html",
 	"stage.html",
     "postquestionnaire.html",
-    "postquestionnaire2.html"
+    "postquestionnaire2.html",
+    "postquestionnaire3.html"
 ];
 
 psiTurk.preloadPages(pages);
@@ -87,7 +88,9 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        calculate_trials(4, 4, 4, 4, 8);
+        calculate_trials(0, 0, 0, 0, 1);
+        //calculate_trials(1, 1, 1, 1, 2);
+        //calculate_trials(4, 4, 4, 4, 8);
     };
 
     var createMain = function () {
@@ -101,7 +104,9 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10); // the number at the end refers to # milliseconds between mouse position recordings
         setTrial(trial);
         trials = [];
-        calculate_trials(75, 25, 25, 50, 25);
+        calculate_trials(0, 0, 0, 0, 1);
+        //calculate_trials(1, 1, 1, 1, 2);
+        //calculate_trials(75, 25, 25, 50, 25);
     };
 
     var havePointerLock = 'pointerLockElement' in document ||
@@ -442,8 +447,6 @@ var PreQ = function() {
 
 };
 
-let q = 1;
-
 var Questionnaire = function() {
 
 	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
@@ -482,7 +485,7 @@ var Questionnaire = function() {
 			    clearInterval(reprompt); 
                 psiTurk.computeBonus('compute_bonus', function(){
                     bonus = d3.format(".2f")(bonus);
-                    alert("Your bonus is $" + bonus + ". After verification, it will be send within 5 working days.");
+                    alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
                 	psiTurk.completeHIT(); // when finished saving compute bonus, then quit
                 });
 			}, 
@@ -496,28 +499,28 @@ var Questionnaire = function() {
 
 	let next = document.getElementById("next");
 
-	next.onclick = function () {
-	    if(q === 1) {
-            recordLoc();
-            psiTurk.showPage('postquestionnaire2.html');
-            q++;
-        } else if(q === 2){
-	        recordBisbasMtq();
+    next.onclick = function(){
+	    recordLoc();
+        next.onclick = undefined;
+        psiTurk.showPage('postquestionnaire2.html');
+        next = document.getElementById("next");
+        next.onclick = function(){
+            recordBisbasMtq();
+            next.onclick = undefined;
             psiTurk.showPage('postquestionnaire3.html');
-
             next = document.getElementById("next");
-            next.onclick = function () {
+            next.onclick = function(){
                 recordBisbasMtq();
                 psiTurk.saveData({
                     success: function(){
                         psiTurk.computeBonus('compute_bonus', function() {
                             bonus = d3.format(".2f")(bonus);
                             alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
-                            psiTurk.completeHIT(); // when finished saving compute bonus, the quit
+                            psiTurk.completeHIT(); // when finished saving compute bonus, then quit
                         });
                     },
                     error: prompt_resubmit});
-            };
+            }
         }
     }
 };
