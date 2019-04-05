@@ -4,7 +4,7 @@ if screen -list | grep -q exp; then     # run bash script
 fi
 
 if netstat -tlp 2>/dev/null | grep -q gunicorn; then
-    while psiturk -e status | grep -q blocked
+    while psiturk -e status | grep -q blocked && netstat -tlp 2>/dev/null | grep -q gunicorn
     do
         echo "Waiting..."
         sleep 1

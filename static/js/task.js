@@ -42,6 +42,15 @@ var instructionPages = [ // add as a list as many pages as you like
 
 var bonus = 0;
 var reward_trials = [];
+
+const conditions = [[3, 2, 0, 0, 3, 3, 0, 3, 0, 2, 0, 3, 0, 3, 3, 0, 0, 3, 3, 3, 0, 0, 0, 1, 3, 0, 2, 0, 2, 0, 0, 0, 2, 0, 3, 0, 0, 0, 2, 0, 0, 0, 3, 0, 3, 0, 3, 0, 2, 0, 2, 2, 1, 0, 0, 1, 3, 2, 0, 3, 0, 0, 3, 0, 3, 0, 2, 0, 0, 0, 1, 0, 0, 0, 3, 1, 0, 1, 0, 2, 0, 0, 3, 3, 0, 1, 3, 3, 0, 0, 2, 0, 2, 3, 1, 2, 1, 1, 0, 1, 3, 0, 0, 0, 3, 0, 1, 3, 0, 3, 3, 1, 0, 0, 3, 3, 0, 1, 0, 3, 1, 2, 0, 3, 2, 2, 0, 0, 2, 2, 2, 3, 1, 0, 3, 0, 0, 3, 3, 3, 0, 0, 3, 2, 1, 3, 0, 3, 3, 1, 3, 1, 0, 3, 0, 3, 2, 1, 0, 1, 1, 3, 0, 3, 0, 1, 3, 2, 0, 2, 1, 1, 3, 0, 0]
+    ,
+    [3, 1, 0, 3, 0, 0, 0, 3, 2, 0, 0, 0, 2, 0, 3, 2, 0, 3, 0, 0, 1, 0, 3, 0, 3, 2, 0, 0, 0, 1, 0, 3, 0, 1, 1, 2, 1, 3, 0, 3, 0, 2, 3, 1, 0, 3, 2, 0, 0, 3, 0, 0, 0, 2, 0, 2, 0, 0, 1, 3, 3, 2, 1, 1, 3, 0, 1, 2, 0, 3, 3, 0, 0, 1, 1, 0, 3, 1, 3, 0, 0, 0, 2, 0, 2, 3, 3, 0, 2, 3, 3, 1, 1, 3, 0, 2, 2, 0, 0, 3, 1, 0, 2, 2, 3, 0, 1, 0, 3, 3, 0, 0, 3, 3, 0, 0, 3, 0, 0, 1, 3, 0, 1, 0, 3, 0, 3, 3, 0, 3, 1, 2, 3, 0, 0, 0, 2, 1, 0, 3, 0, 3, 3, 3, 0, 2, 3, 0, 1, 0, 3, 3, 3, 2, 3, 0, 0, 0, 3, 2, 0, 0, 0, 2, 0, 3, 1, 0, 0, 0, 1, 0, 2, 3, 0]
+    ,
+    [3, 0, 3, 0, 0, 1, 3, 0, 2, 1, 0, 0, 1, 0, 3, 2, 0, 1, 0, 0, 0, 2, 3, 0, 0, 2, 3, 0, 0, 2, 1, 0, 0, 0, 3, 0, 0, 0, 3, 3, 3, 2, 0, 1, 3, 3, 3, 1, 0, 0, 3, 1, 0, 3, 1, 0, 2, 0, 2, 0, 2, 0, 1, 0, 2, 3, 0, 1, 3, 0, 1, 2, 0, 1, 3, 0, 2, 2, 3, 0, 3, 0, 3, 3, 0, 0, 0, 3, 1, 0, 1, 0, 3, 3, 2, 3, 2, 2, 0, 0, 3, 3, 2, 2, 3, 0, 0, 2, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 3, 3, 0, 0, 3, 0, 1, 3, 0, 1, 0, 3, 2, 0, 3, 0, 0, 2, 3, 3, 3, 0, 1, 0, 0, 2, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 2, 0, 1, 3, 0, 1, 0, 0, 3, 0, 3, 3, 3, 0, 3, 3, 2, 3, 2, 0, 3]
+    ,
+    [3, 3, 0, 0, 2, 0, 1, 2, 1, 0, 3, 0, 0, 3, 0, 0, 2, 2, 0, 0, 2, 0, 3, 3, 0, 0, 3, 0, 0, 1, 0, 3, 1, 3, 0, 3, 3, 3, 0, 2, 0, 3, 0, 0, 3, 0, 0, 1, 1, 0, 0, 1, 0, 3, 0, 3, 0, 2, 0, 0, 1, 3, 0, 3, 3, 3, 0, 1, 2, 0, 2, 1, 3, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3, 3, 0, 0, 1, 2, 1, 0, 3, 0, 0, 0, 2, 0, 3, 0, 2, 3, 1, 0, 3, 3, 3, 0, 3, 0, 1, 0, 2, 1, 1, 0, 1, 3, 3, 2, 0, 0, 0, 2, 0, 0, 2, 3, 3, 0, 3, 3, 3, 0, 3, 3, 0, 2, 1, 3, 0, 1, 2, 1, 0, 2, 3, 0, 0, 1, 1, 0, 2, 0, 2, 0, 3, 0, 3, 0, 0, 0, 2, 3, 2, 3, 3, 0, 3, 3, 3, 0, 1, 0, 2, 3, 2]
+    ];
 var Mousetrack = function(rewards) {
     // Load the stage.html snippet into the body of the page
     psiTurk.showPage('stage.html');
@@ -180,24 +189,30 @@ var Mousetrack = function(rewards) {
 
     function calculate_trials(num_press, num_left_solo, num_right_solo, num_guess, break_threshold){
         var arr = [];
-        var expand = function(data, frequency){
-            var ret = [];
-            for(var i = 0; i < frequency; i++){
-                ret.push(data);
-            }
-            return ret
-        };
-        const press_row = 0;
-        const left_solo_row = 1;
-        const right_solo_row = 2;
-        const guess_row = 3;
-        const break_trial = -1;
+        if(num_press === 75 && num_left_solo === 25 && num_right_solo === 25 && num_guess === 50){
+            // These are four pre-created conditions for the main experiment.
+            arr = conditions[condition];
+        } else {
+            var expand = function(data, frequency){
+                var ret = [];
+                for(var i = 0; i < frequency; i++){
+                    ret.push(data);
+                }
+                return ret
+            };
+            const press_row = 0;
+            const left_solo_row = 1;
+            const right_solo_row = 2;
+            const guess_row = 3;
+            const break_trial = -1;
 
-        arr.push.apply(arr, expand(press_row, num_press));
-        arr.push.apply(arr, expand(left_solo_row, num_left_solo));
-        arr.push.apply(arr, expand(right_solo_row, num_right_solo));
-        arr.push.apply(arr, expand(guess_row, num_guess));
-        arr = _.shuffle(arr);
+            arr.push.apply(arr, expand(press_row, num_press));
+            arr.push.apply(arr, expand(left_solo_row, num_left_solo));
+            arr.push.apply(arr, expand(right_solo_row, num_right_solo));
+            arr.push.apply(arr, expand(guess_row, num_guess));
+            arr = _.shuffle(arr);
+        }
+
         let len = arr.length;
         for(var i = break_threshold; i < len; i+= break_threshold + 1){
             arr.splice(i, 0, break_trial);
