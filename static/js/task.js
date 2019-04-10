@@ -98,8 +98,8 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        calculate_trials(0, 0, 0, 0, 1);
-        //calculate_trials(1, 1, 1, 1, 2);
+        //calculate_trials(0, 0, 0, 0, 1);
+        calculate_trials(1, 1, 1, 1, 2);
         //calculate_trials(4, 4, 4, 4, 8);
     };
 
@@ -114,8 +114,8 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10); // the number at the end refers to # milliseconds between mouse position recordings
         setTrial(trial);
         trials = [];
-        calculate_trials(0, 0, 0, 0, 1);
-        //calculate_trials(1, 1, 1, 1, 2);
+        //calculate_trials(0, 0, 0, 0, 1);
+        calculate_trials(1, 1, 1, 1, 2);
         //calculate_trials(75, 25, 25, 50, 25);
     };
 
@@ -162,11 +162,17 @@ var Mousetrack = function(rewards) {
     var showStart = function(message){
         if (mode === "practice") createPractice();
         else if (mode === "main") createMain();
+
+        var cursor = document.getElementById("cursor");
+        cursor.style.top = '0px';
+        cursor.style.left = '0px';
+
         getCursor();
         var startExp = document.getElementById("start-exp");
         startExp.style.visibility = "visible";
         document.addEventListener("click", function start(){
             if(cursorOn(startExp)){
+                console.log("Click registered and start clicked");
                 document.removeEventListener("click", start);
                 trial.setup(mode === "practice" ? restart : exit);
                 startTrial();
@@ -175,6 +181,7 @@ var Mousetrack = function(rewards) {
         });
         showMessage(trial, message, "black", true,
             function(){
+                console.log('Unlock removed!');
                 trial.unlock = getCursor;
             });
     };
@@ -190,6 +197,13 @@ var Mousetrack = function(rewards) {
 
     function calculate_trials(num_press, num_left_solo, num_right_solo, num_guess, break_threshold){
         var arr = [];
+
+        const press_row = 0;
+        const left_solo_row = 1;
+        const right_solo_row = 2;
+        const guess_row = 3;
+        const break_trial = -1;
+
         if(num_press === 75 && num_left_solo === 25 && num_right_solo === 25 && num_guess === 50){
             // These are four pre-created conditions for the main experiment.
             arr = conditions[condition];
@@ -201,11 +215,6 @@ var Mousetrack = function(rewards) {
                 }
                 return ret
             };
-            const press_row = 0;
-            const left_solo_row = 1;
-            const right_solo_row = 2;
-            const guess_row = 3;
-            const break_trial = -1;
 
             arr.push.apply(arr, expand(press_row, num_press));
             arr.push.apply(arr, expand(left_solo_row, num_left_solo));

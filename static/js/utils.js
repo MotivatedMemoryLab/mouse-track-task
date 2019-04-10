@@ -66,6 +66,7 @@ function lockMouse(x, y){ // Must be called in context of Trial, e.g. from showM
         } else {
             cursor.style.display = "none";
             document.removeEventListener("mousemove", moveCallback);
+            console.log("Unlocked");
             trial.unlock();
         }
     }
@@ -85,6 +86,11 @@ function lockMouse(x, y){ // Must be called in context of Trial, e.g. from showM
         var xoff = $(cursor).width();
         var yoff = $(cursor).height();
         var newleft, newtop = 0;
+
+        let sum = Math.abs(movementY) + Math.abs(movementX);
+        let ratio = sum / 10;
+        //movementX = movementX / ratio;
+        //movementY = movementY / ratio;
 
         if(movementX > 0){
             newleft = pix2num(cursor.style.left) + movementX/moveFactor;

@@ -1,21 +1,24 @@
 class Trial {
 
-  constructor(container, nextHandler, onUnlock, interval){
+  constructor(container, nextHandler, interval){
     this.container = container;
     this.next = nextHandler;
     this.cursor = document.getElementById('cursor');
     this.factor = 10;
-    this.unlock = onUnlock;
     this.valid = true;
     this.interval = interval;
+    this.pressTime = null;
   }
 
   setup(onFail){
+    console.log ("Set up!");
     this.unlock = function() {
       
       this.cursor.style.display = "none";
       this.valid = false;
       clearTimeout(this.timer);
+      clearTimeout(this.pressTime);
+      clearInterval(this.mouserecorder);
 
       document.removeEventListener("mousemove", this.mouseRecord);
       document.removeEventListener("click", this.checkClicks);
@@ -48,7 +51,7 @@ class Trial {
         _myself.pressed(e);
       };
       container.appendChild(indicator);
-      setTimeout(this.endPress.bind(this), this.duration)
+      this.pressTime = setTimeout(this.endPress.bind(this), this.duration)
     };
 
     this.cursor.style.display = "none";
@@ -86,10 +89,12 @@ class Trial {
 
   //-----------------------SUPPOSED TO BE PRIVATE-----------------------//
   countdown(message, color, start, duration, callback){
-    if(start <= 1){
-      showMessage(this, message + " in " + start, color, false, callback, duration)
-    } else
-      showMessage(this, message + " in " + start, color, false, function(){this.countdown(message, color, start - 1, duration, callback)}, duration)
+    if(this.valid){
+        if(start <= 1){
+            showMessage(this, message + " in " + start, color, false, callback, duration)
+        } else
+            showMessage(this, message + " in " + start, color, false, function(){this.countdown(message, color, start - 1, duration, callback)}, duration)
+    }
   }
 
   doDouble(val1, val2, reveal){
@@ -102,8 +107,8 @@ class Trial {
 
   endPress(){
     this.myBody.onkeyup = undefined;
-    this.container.children[0].style.background =
-      (this.presses >= this.num) ? "#0a0" : "#a00";
+    //this.container.children[0].style.background =
+    //  (this.presses >= this.num) ? "#0a0" : "#a00";
 
     this.ret.push(this.presses);
     setTimeout(function(){
@@ -184,7 +189,7 @@ class Trial {
     div.style.float = gravity;
 
     if(reveal){
-      var rgb = "#" + "0000" + (Math.round(255*cash)).toString(16);
+      var rgb = "#" + (Math.round(255*cash)).toString(16) + "0000";
       div.style.background = rgb;
     }
     div.style.borderColor = div.style.backgroundColor;
