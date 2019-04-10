@@ -7,6 +7,8 @@
 
     <div class="instructions well">
 
+        <h2><b>Self-Description Questionnaire</b></h2>
+
         <p>
             This questionnaire asks you to respond to statements about your attitudes, opinions, and behaviors. Read each statement carefully, and decide whether or not the statement describes you.  Using the scale at the top of each page indicate the degree to which the <b>ENTIRE</b> statement is true of you.  Give only one answer for each statement.
         </p>
@@ -15,14 +17,80 @@
             Some of the statements may refer to experiences you may not have had.  Respond to these statements in terms of how true you think it <b>WOULD BE</b> of you.
         </p>
 
-        <p>1 = Very True for Me</p>
-        <p>2 = True for Me</p>
-        <p>3 = Somewhat True for Me</p>
-        <p>4 = Somewhat Untrue for Me</p>
-        <p>5 = Untrue for Me</p>
-        <p>6 = Very Untrue for Me</p>
+        <p>
+            Look at the sample statement below.
+        </p>
 
-        <form id="postquiz" method="post">
+        <p><b>Sample Statement:</b></p>
+        <div id='tablewrapper'>
+
+            <table class="pq3">
+                <tr class="num">
+                    <td>
+                        <b>1</b><br />&#x25BC
+                    </td>
+                    <td>
+                        <b>2</b><br />&#x25BC
+                    </td>
+                    <td>
+                        <b>3</b><br />&#x25BC
+                    </td>
+                    <td>
+                        <b>4</b><br />&#x25BC
+                    </td>
+                    <td>
+                        <b>5</b><br />&#x25BC
+                    </td>
+                    <td>
+                        <b>6</b><br />&#x25BC
+                    </td>
+                </tr>
+                <tr style="border-bottom-color: black">
+                    <td>
+                        Very <b>UNTRUE</b> of Me
+                    </td>
+                    <td>
+                        <b>UNTRUE</b> of Me
+                    </td>
+                    <td>
+                        Somewhat <b>UNTRUE</b> of Me
+                    </td>
+                    <td>
+                        Somewhat <b>TRUE</b> of Me
+                    </td>
+                    <td>
+                        <b>TRUE</b> of Me
+                    </td>
+                    <td>
+                        Very <b>TRUE</b> of Me
+                    </td>
+                </tr>
+            </table>
+            <br />
+            <b>I like to go to parties.</b>
+            <p>
+                Mark
+            </p>
+            <b style="padding-left: 10px">1</b>&nbsp;&nbsp;&nbsp;&nbsp;if you dislike parties and try to avoid them.<br />
+            <b style="padding-left: 10px">2</b>&nbsp;&nbsp;&nbsp;&nbsp;if you generally dislike parties and only go when you have to.<br />
+            <b style="padding-left: 10px">3</b>&nbsp;&nbsp;&nbsp;&nbsp;if you think parties are okay but generally prefer not to go.<br />
+            <b style="padding-left: 10px">4</b>&nbsp;&nbsp;&nbsp;&nbsp;if you think parties are okay and generally prefer to go.<br />
+            <b style="padding-left: 10px">5</b>&nbsp;&nbsp;&nbsp;&nbsp;if you generally like parties and go most of the time.<br />
+            <b style="padding-left: 10px">6</b>&nbsp;&nbsp;&nbsp;&nbsp;if you really like parties and only miss one if you absolutely have to.<br />
+        </div>
+
+        <p>
+            <b>Please Note:</b>
+        </p>
+        <ul>
+            <li>There are no right or wrong answers.  Simply describe yourself honestly and state your opinions accurately.</li>
+            <li>In deciding on your answer, consider your life in general and not only the last few weeks or months.</li>
+            <li>Deciding on an answer may be difficult for some of the statements.  If you have a hard time deciding, choose the answer that is MOST true of you.</li>
+            <li>Some of the items will seem repetitive.  These are not meant to be trick questions.  Do not look back at your previous answers, simply answer each question honestly.</li>
+            <li>The scale is reversed from the previous questionnaire. Please make sure you select the intended option.</li>
+        </ul>
+
+        <form id="postquiz3" method="post">
 
             <script>
                 $.ajax({
@@ -30,7 +98,7 @@
                     url: "static/resources/mtq.txt",
                     dataType: "text",
                     success: function (data) {
-                        let form = $('#postquiz');
+                        let form = $('#postquiz3');
                         data = data.split("\n");
                         var choices = function(id){
                             return  "<select id='" + id + "' name='" + id + "'>\n" +
@@ -41,7 +109,7 @@
                                 "    <option value='4'>4</option>\n" +
                                 "    <option value='5'>5</option>\n" +
                                 "    <option value='6'>6</option>\n" +
-                                    "</select>";
+                                "</select>";
 
                         };
 

@@ -16,7 +16,7 @@
         <p>3 = Somewhat False for Me</p>
         <p>4 = Very False for Me</p>
 
-        <form id="postquiz" method="post">
+        <form id="postquiz2" method="post">
 
             <script>
                 $.ajax({
@@ -24,7 +24,7 @@
                     url: "static/resources/bisbas.txt",
                     dataType: "text",
                     success: function (data) {
-                        let form = $('#postquiz');
+                        let form = $('#postquiz2');
                         data = data.split("\n");
                         var choices = function(id){
                             return  "<select id='" + id + "' name='" + id + "'>\n" +

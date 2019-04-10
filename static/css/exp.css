@@ -45,3 +45,29 @@
   background-color:#77f;
   width:300px;
 }
+
+#tablewrapper {
+  padding: 10px;
+  border: 3px solid black;
+  margin: auto;
+  width: auto;
+}
+
+label {
+  font-weight: 300;
+}
+
+table.pq3 {
+  border-collapse: collapse;
+}
+
+table.pq3 td {
+  border: 1px solid gray;
+  border-bottom: 1px solid black;
+  text-align: center;
+  padding: 4px;
+}
+
+table.pq3 .num {
+  border-bottom: 2px solid black;
+}
