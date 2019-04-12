@@ -9,6 +9,7 @@ var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode);
 
 // All pages to be loaded
 var pages = [
+    "pre-test.html",
 	"instructions/instruct-1.html",
 	"instructions/instruct-2.html",
 	"instructions/instruct-3.html",
@@ -87,13 +88,13 @@ var Mousetrack = function(rewards) {
     var trials = null;
     var trial_num = 0;
     reward_trials = [];
-    var mode = "practice";
+    var trialMode = "practice";
 
     rewards = rewards.split("\n").map(function(row){return row.split(",");});
 
 
     var createPractice = function () {
-        mode = "practice";
+        trialMode = "practice";
         trial_num = 0;
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
@@ -104,7 +105,7 @@ var Mousetrack = function(rewards) {
     };
 
     var createMain = function () {
-        mode = "main";
+        trialMode = "main";
         trial_num = 0;
         reward_trials = [...Array(176).keys()];
         reward_trials = reward_trials.slice(1);
@@ -160,8 +161,8 @@ var Mousetrack = function(rewards) {
     };
 
     var showStart = function(message){
-        if (mode === "practice") createPractice();
-        else if (mode === "main") createMain();
+        if (trialMode === "practice") createPractice();
+        else if (trialMode === "main") createMain();
 
         var cursor = document.getElementById("cursor");
         cursor.style.top = '0px';
@@ -174,7 +175,7 @@ var Mousetrack = function(rewards) {
             if(cursorOn(startExp)){
                 console.log("Click registered and start clicked");
                 document.removeEventListener("click", start);
-                trial.setup(mode === "practice" ? restart : exit);
+                trial.setup(trialMode === "practice" ? restart : exit);
                 startTrial();
                 startExp.style.visibility = "hidden";
             }
@@ -312,13 +313,13 @@ var Mousetrack = function(rewards) {
             }
         } else {
             psiTurk.saveData();
-            if(mode === "practice"){
+            if(trialMode === "practice"){
                 trial.setup(Function);
                 document.exitPointerLock();
-                mode = "main";
+                trialMode = "main";
                 document.getElementById("cursor").style.top = "0";
                 showStart("You are about to start the main experiment. You must finish completely without exiting for your results to be counted.")
-            } else if (mode === "main") {
+            } else if (trialMode === "main") {
                 document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
                 document.onpointerlockchange = undefined;
                 document.exitPointerLock();
@@ -329,7 +330,7 @@ var Mousetrack = function(rewards) {
 
     function next(){
 
-        let included = mode === "main" && reward_trials.includes(trial_num);
+        let included = trialMode === "main" && reward_trials.includes(trial_num);
 
         switch(arguments[0][0]){
             case "press":
@@ -341,7 +342,7 @@ var Mousetrack = function(rewards) {
                     'trial':"press",
                     'included':included,
                     'trial_num': trial_num,
-                    'mode':mode,
+                    'mode':trialMode,
                     'num':arguments[0][1],
                     'duration':arguments[0][2],
                     'val1':arguments[0][3],
@@ -361,7 +362,7 @@ var Mousetrack = function(rewards) {
                     'trial':"double",
                     'included':included,
                     'trial_num': trial_num,
-                    'mode':mode,
+                    'mode':trialMode,
                     'val1':arguments[0][1],
                     'val2':arguments[0][2],
                     'reveal':arguments[0][3],
@@ -379,7 +380,7 @@ var Mousetrack = function(rewards) {
                     'trial':"single",
                     'included':included,
                     'trial_num': trial_num,
-                    'mode':mode,
+                    'mode':trialMode,
                     'value':arguments[0][1],
                     'side':arguments[0][2],
                     'reveal':arguments[0][3],
@@ -399,10 +400,73 @@ var Mousetrack = function(rewards) {
 * Questionnaire *
 ****************/
 
+var PreTest = function() {
+    function record(){
+        const names = ['pt0','pt1','pt2','pt3','pt4'];
+        let blank = false;
+        $.each(names, function(i, n){
+            if ($("input[type=radio][name="+n+"]:checked").length <= 0) {
+                alert("Please answer all questions.");
+                blank = true;
+                return false;
+            }
+        });
+        if (blank)
+            return false;
+        let answers = {};
+        $('input').each(function () {
+            answers[this.id] = this.checked;
+            psiTurk.recordUnstructuredData(this.id, this.checked);
+        });
+
+        let correct = 0;
+
+        console.log(answers);
+        if(!(
+            answers["r-pretest0"] &&
+            answers["l-pretest1"] &&
+            answers["l-pretest2"] &&
+            answers["r-pretest3"] &&
+            answers["r-pretest4"]
+        )){
+            psiTurk.recordUnstructuredData("ineligibility", "color: " + JSON.stringify(answers));
+            window.location.replace("/ineligible?uniqueId="+uniqueId);
+            return false;
+        }
+
+        return true;
+
+    }
+
+    psiTurk.showPage('pre-test.html');
+    psiTurk.recordTrialData({'phase':'pretest', 'status':'begin'});
+
+    let prompts = {1: 'Which square is brighter?', 2:'Which square is blue?'};
+
+    let colors = [["#001", "#003",prompts[1]],["#007", "#005",prompts[1]],["#00b", "#009",prompts[1]],
+                    ["#00d","#00f",prompts[1]],["#333","#003",prompts[2]]];
+
+    $.each(colors, function (i, n) {
+        $("#tests").append(
+            "<div class='comparator'>" +
+            "   <div class='test' id='test"+ i.toString() +"left' style='background-color: "+ n[0] +"'></div>\n" +
+            "   <div class='test' id='test"+ i.toString() +"right' style='background-color: "+ n[1] +"'></div>\n" +
+            "   <label>" + n[2] + "</label>\n" +
+            "   <input type='radio' name='pt" + i.toString() + "' id='l-pretest" + i.toString() + "'> Left" +
+            "   <input type='radio' name='pt" + i.toString() + "' id='r-pretest" + i.toString() + "'> Right" +
+            "</div>")
+    });
+
+    $("#next").click(function(){
+        if(record())
+            PreQ();
+    });
+};
+
 var PreQ = function() {
    record_responses = function() {
 
-       if(document.getElementById("age").value === "" || document.getElementById("cursor_sel").value === ""){
+       if(mode !== 'debug' && (document.getElementById("age").value === "" || document.getElementById("cursor_sel").value === "")){
            alert("Please fill out the form before continuing.");
            return false;
        }
@@ -430,7 +494,7 @@ var PreQ = function() {
         }
 
 
-       if(document.getElementById("cursor_sel").value !== "leftmouse" && document.getElementById("cursor_sel").value !== "rightmouse"){
+       if(mode !== 'debug' && document.getElementById("cursor_sel").value !== "leftmouse" && document.getElementById("cursor_sel").value !== "rightmouse"){
            psiTurk.recordUnstructuredData("ineligibility", "mouse: " + document.getElementById("cursor_sel").value);
            window.location.replace("/ineligible?uniqueId="+uniqueId);
            return false;
@@ -555,5 +619,5 @@ var Questionnaire = function() {
  ******************/
 
 $(window).load( function(){
-    PreQ();
+    PreTest();
 });
