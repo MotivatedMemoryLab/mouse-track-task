@@ -111,7 +111,10 @@ var Mousetrack = function(rewards) {
         reward_trials = reward_trials.slice(1);
         shuffleArray(reward_trials);
         reward_trials = reward_trials.slice(0, 10);
-        reward_trials = reward_trials.sort();
+        function sorter(a, b){
+            return a - b;
+        }
+        reward_trials = reward_trials.sort(sorter);
         trial = new Trial(document.getElementById('container'), next, 10); // the number at the end refers to # milliseconds between mouse position recordings
         setTrial(trial);
         trials = [];
@@ -421,7 +424,6 @@ var PreTest = function() {
 
         let correct = 0;
 
-        console.log(answers);
         if(!(
             answers["r-pretest0"] &&
             answers["l-pretest1"] &&

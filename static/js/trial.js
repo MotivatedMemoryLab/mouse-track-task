@@ -189,7 +189,7 @@ class Trial {
     div.style.float = gravity;
 
     if(reveal){
-      var rgb = "#" + (Math.round(255*cash)).toString(16) + "0000";
+      var rgb = "#0000" + (Math.round(255*cash)).toString(16);
       div.style.background = rgb;
     }
     div.style.borderColor = div.style.backgroundColor;
