@@ -1,0 +1,57 @@
+<div id="container-questionnaire">
+    <h1>Main Task Complete</h1>
+
+    <hr />
+
+    <p>You are finished with the main task! Now we would like you to complete three short behavioral questionnaires about yourself before completing your HIT.</p>
+
+    <div class="instructions well">
+
+        <p>
+            On this questionnaire are pairs of statements. Please read each group of statements carefully. Then choose either A or B, whichever best describes the way you have been feeling over the past week, including today. Click the letter beside the statement you picked. Be sure to read both statements in each pair before making your choice.
+        </p>
+
+        <form id="postquiz1" method="post">
+
+            <script>
+                $.ajax({
+                    type: "GET",
+                    url: "static/resources/loc.txt",
+                    dataType: "text",
+                    success: function (data) {
+                        let form = $('#postquiz1');
+                        data = data.split("\n");
+                        for (let i = 1; i <= data.length; i += 2){
+                            let j = ((i+1)/2 | 0); // 1 1 2 2 ...
+                            form.append(j + ".<br><input type='radio' name='" + j + "' id='loc" + j + "a'>" + data[i-1] + "<br>" +
+                            "<input type='radio' name='" + j + "' id='loc" + j + "b'>" + data[i] + "<br>");
+                        }
+                    },
+                    error: function (req, status, error) {
+                        $("body").html("<p>" + error + "</p>");
+                    }
+                })
+            </script>
+
+
+        </form>
+    </div>
+
+    <hr />
+
+    <div class="instructionsnav">
+        <div class="row">
+            <div class="col-xs-2">
+            </div>
+            <div class="col-xs-7">
+            </div>
+            <div class="col-xs-3">
+                <button type="button" id="next" value="next" class="btn btn-primary btn-lg continue">
+                    Continue <span class="glyphicon glyphicon-arrow-right"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+</div>

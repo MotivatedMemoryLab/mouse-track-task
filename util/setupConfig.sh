@@ -17,6 +17,8 @@ if [ -r util/dbcreds ]; then
 		let port=port+1
 	done
 
+	git checkout -- config.txt
+
 	sed -i "s|^port = .*|port = $port|" $config
 
 	let port=port-10

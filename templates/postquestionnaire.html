@@ -3,36 +3,186 @@
 
     <hr />
 
-    <p>You are finished with the main task! Now we would like you to complete three short behavioral questionnaires about yourself before completing your HIT.</p>
+    <p>You are finished with the main task! Before completing your three behavioral questionnaires, we would like to ask you about the task.</p>
 
     <div class="instructions well">
 
         <p>
-            On this questionnaire are pairs of statements. Please read each group of statements carefully. Then choose either A or B, whichever best describes the way you have been feeling over the past week, including today. Click the letter beside the statement you picked. Be sure to read both statements in each pair before making your choice.
+            Please answer the following questions honestly. Your responses will not affect your bonus. You may skip any questions you are uncomfortable answering.
         </p>
 
         <form id="postquiz" method="post">
+            <p>
+                Did you speed up your mouse cursor through your computer settings prior to the main task?
+            </p>
 
-            <script>
-                $.ajax({
-                    type: "GET",
-                    url: "static/resources/loc.txt",
-                    dataType: "text",
-                    success: function (data) {
-                        let form = $('#postquiz');
-                        data = data.split("\n");
-                        for (let i = 1; i <= data.length; i += 2){
-                            let j = ((i+1)/2 | 0); // 1 1 2 2 ...
-                            form.append(j + ".<br><input type='radio' name='" + j + "' id='loc" + j + "a'>" + data[i-1] + "<br>" +
-                            "<input type='radio' name='" + j + "' id='loc" + j + "b'>" + data[i] + "<br>");
-                        }
-                    },
-                    error: function (req, status, error) {
-                        $("body").html("<p>" + error + "</p>");
-                    }
-                })
-            </script>
+            <select id="spedMouse">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+            </select>
 
+            <br />
+
+            <p style="margin-top: 15px">
+                In the following questions, select a value 1-7 where:<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;1 = Not at all<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;4 = Somewhat<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;7 = Very<br />
+            </p>
+
+            <h2>Motivation</h2>
+            <p>
+                How motivated were you to complete single trials?<br />
+            </p>
+
+            <select id="motivation-single">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+
+            <p>
+                How motivated were you to complete the double trials?
+            </p>
+
+            <select id="motivation-double">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+
+            <p>
+                How motivated were you to reveal the reward amounts in press trials (i.e. press the spacebar enough times)?
+            </p>
+
+
+            <select id="motivation-press">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+
+            <h2>
+                Enjoyment
+            </h2>
+
+            <p>
+                How much did you like the single trials?
+            </p>
+
+            <select id="enjoyment-single">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+
+            <p>
+                How much did you like the double trials?
+            </p>
+
+            <select id="enjoyment-double">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+
+            <p>
+                How much did you like the press trials?
+            </p>
+
+            <select id="enjoyment-press">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+
+            <h2>
+                Interest
+            </h2>
+
+            <p>
+                How interested were you in discovering the reward value of the single trials?
+            </p>
+
+            <select id="interest-single">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+
+            <p>
+                How interested were you in discovering the reward value of the double trials?
+            </p>
+
+            <select id="interest-double">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+            <p>
+                How interested were you in discovering the reward value of the press trials?
+            </p>
+
+            <select id="interest-press">
+                <option hidden disabled selected value label = ' '></option>
+                <option value="1" label="1">1</option>
+                <option value="2" label="2">2</option>
+                <option value="3" label="3">3</option>
+                <option value="4" label="4">4</option>
+                <option value="5" label="5">5</option>
+                <option value="6" label="6">6</option>
+                <option value="7" label="7">7</option>
+            </select>
+
+            <p>
+                Describe any strategies you used to complete the task; e.g. rotating the mouse.
+            </p>
+            <textarea id="strategies" rows="8" cols="50"></textarea>
+
+            <p>
+                Do you have any other feedback regarding this task?
+            </p>
+            <textarea id="feedback" rows="8" cols="50"></textarea>
 
         </form>
     </div>

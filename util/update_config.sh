@@ -6,4 +6,3 @@ git commit -m "Update config.txt"
 git update-index --assume-unchanged config.txt
 util/psi-kill.sh
 util/setupConfig.sh
-
