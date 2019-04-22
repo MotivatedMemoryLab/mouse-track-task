@@ -44,6 +44,7 @@ var instructionPages = [ // add as a list as many pages as you like
 
 var bonus = 0;
 var reward_trials = [];
+var pct = 0;
 
 const conditions = [[3, 2, 0, 0, 3, 3, 0, 3, 0, 2, 0, 3, 0, 3, 3, 0, 0, 3, 3, 3, 0, 0, 0, 1, 3, 0, 2, 0, 2, 0, 0, 0, 2, 0, 3, 0, 0, 0, 2, 0, 0, 0, 3, 0, 3, 0, 3, 0, 2, 0, 2, 2, 1, 0, 0, 1, 3, 2, 0, 3, 0, 0, 3, 0, 3, 0, 2, 0, 0, 0, 1, 0, 0, 0, 3, 1, 0, 1, 0, 2, 0, 0, 3, 3, 0, 1, 3, 3, 0, 0, 2, 0, 2, 3, 1, 2, 1, 1, 0, 1, 3, 0, 0, 0, 3, 0, 1, 3, 0, 3, 3, 1, 0, 0, 3, 3, 0, 1, 0, 3, 1, 2, 0, 3, 2, 2, 0, 0, 2, 2, 2, 3, 1, 0, 3, 0, 0, 3, 3, 3, 0, 0, 3, 2, 1, 3, 0, 3, 3, 1, 3, 1, 0, 3, 0, 3, 2, 1, 0, 1, 1, 3, 0, 3, 0, 1, 3, 2, 0, 2, 1, 1, 3, 0, 0]
     ,
@@ -77,10 +78,13 @@ var Mousetrack = function(rewards) {
     psiTurk.recordUnstructuredData("color-depth", window.screen.colorDepth);
 
     window.moveTo(0, 0);
-    window.resizeTo(screen.availWidth, screen.availHeight);
+    window.resizeTo(screen.width, screen.availHeight);
+    let noContext = document.addEventListener('contextmenu', function(e){
+        e.preventDefault()
+    });
 
     $(window).resize(function(){
-        window.resizeTo(screen.availWidth, screen.availHeight);
+        window.resizeTo(screen.width, screen.availHeight);
         window.moveTo(0, 0);
     });
 
@@ -101,14 +105,15 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10);
         setTrial(trial);
         trials = [];
-        calculate_trials(0, 0, 0, 0, 1);
+        //calculate_trials(0, 0, 0, 0, 1);
         //calculate_trials(1, 1, 1, 1, 2);
-        //calculate_trials(4, 4, 4, 4, 8);
+        calculate_trials(4, 4, 4, 4, 8);
     };
 
     var createMain = function () {
         trialMode = "main";
         trial_num = 0;
+        pct = 0;
         reward_trials = [...Array(176).keys()];
         reward_trials = reward_trials.slice(1);
         shuffleArray(reward_trials);
@@ -120,9 +125,9 @@ var Mousetrack = function(rewards) {
         trial = new Trial(document.getElementById('container'), next, 10); // the number at the end refers to # milliseconds between mouse position recordings
         setTrial(trial);
         trials = [];
-        calculate_trials(0, 0, 0, 0, 1);
+        //calculate_trials(0, 0, 0, 0, 1);
         //calculate_trials(1, 1, 1, 1, 2);
-        //calculate_trials(75, 25, 25, 50, 25);
+        calculate_trials(75, 25, 25, 50, 25);
     };
 
     var havePointerLock = 'pointerLockElement' in document ||
@@ -151,16 +156,17 @@ var Mousetrack = function(rewards) {
     var exit = function(){
         showMessage(this, "You have unlocked the cursor during the main experiment, " +
             "and unfortunately you cannot continue. You will still be able to complete " +
-            "this hit, but will not be awarded a bonus. Please click to continue.", "black",     true,
+            "this hit, but only be awarded if you completed at least 80% of the trials. Please click to continue.", "black",     true,
             function(){
                 psiTurk.recordTrialData({
                     'phase':'exit',
                     'trial_num':trial_num
                 });
 
+                psiTurk.recordUnstructuredData('pct_completion', pct);
                 document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
                 document.onpointerlockchange = undefined;
-                Questionnaire();
+                Questionnaire(noContext);
             }
         )
     };
@@ -292,6 +298,7 @@ var Mousetrack = function(rewards) {
     }
 
     function startTrial(){
+        pct = trial_num / (trial_num + trials.length);
         if(trials.length > 0){
             trial_num++;
             var info = trials.shift();
@@ -328,7 +335,7 @@ var Mousetrack = function(rewards) {
                 document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
                 document.onpointerlockchange = undefined;
                 document.exitPointerLock();
-                Questionnaire();
+                Questionnaire(noContext);
             }
         }
     }
@@ -539,7 +546,9 @@ var PreQ = function() {
 
 };
 
-var Questionnaire = function() {
+var Questionnaire = function(noContext) {
+
+    document.removeEventListener(noContext);
 
 	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
 
@@ -569,8 +578,11 @@ var Questionnaire = function() {
 			    clearInterval(reprompt); 
                 psiTurk.computeBonus('compute_bonus', function(){
                     bonus = d3.format(".2f")(bonus);
-                    alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
-                	psiTurk.completeHIT(); // when finished saving compute bonus, then quit
+                    if(pct >= 0.8)
+                        alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
+                	else
+                	    alert("Due to exiting the experiment early, you will not receive a bonus.");
+                    psiTurk.completeHIT(); // when finished saving compute bonus, then quit
                 });
 			}, 
 			error: prompt_resubmit

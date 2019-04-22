@@ -194,6 +194,11 @@ class Trial {
     }
     div.style.borderColor = div.style.backgroundColor;
 
+    if(mode === 'debug'){
+        div.style.color = 'white';
+        div.innerText = rgb;
+    }
+
     this.container.appendChild(div);
   }
 
