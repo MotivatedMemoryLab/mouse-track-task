@@ -79,9 +79,12 @@ var Mousetrack = function(rewards) {
 
     window.moveTo(0, 0);
     window.resizeTo(screen.width, screen.availHeight);
-    let noContext = document.addEventListener('contextmenu', function(e){
-        e.preventDefault()
-    });
+    let noContext = null;
+    if(!mode === "debug"){
+        noContext = document.addEventListener('contextmenu', function(e){
+            e.preventDefault()
+        });
+    }
 
     $(window).resize(function(){
         window.resizeTo(screen.width, screen.availHeight);
@@ -154,21 +157,36 @@ var Mousetrack = function(rewards) {
     };
 
     var exit = function(){
-        showMessage(this, "You have unlocked the cursor during the main experiment, " +
-            "and unfortunately you cannot continue. You will still be able to complete " +
-            "this hit, but only be awarded if you completed at least 80% of the trials. Please click to continue.", "black",     true,
-            function(){
-                psiTurk.recordTrialData({
-                    'phase':'exit',
-                    'trial_num':trial_num
+        if(pct >= 0.8)
+            showMessage(this, "You have unlocked the cursor during the main experiment, " +
+                "but since you have completed at least 80% of the trials, you may continue with the task. " +
+                "Uncompleted trials will be set at $0 value. Please click to continue.", "black", true,
+                function () {
+                    psiTurk.recordTrialData({
+                        'phase':'incomplete',
+                        'trial_num':trial_num
+                    });
+                    psiTurk.recordUnstructuredData('pct_completion', pct);
+                    document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
+                    document.onpointerlockchange = undefined;
+                    Questionnaire(noContext);
                 });
+        else
+            showMessage(this, "You have unlocked the cursor during the main experiment, " +
+                "and unfortunately you cannot continue. You will still be able to complete " +
+                "this hit, but will not be awarded a bonus. Please click to continue.", "black",     true,
+                function(){
+                    psiTurk.recordTrialData({
+                        'phase':'exit',
+                        'trial_num':trial_num
+                    });
 
-                psiTurk.recordUnstructuredData('pct_completion', pct);
-                document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
-                document.onpointerlockchange = undefined;
-                Questionnaire(noContext);
-            }
-        )
+                    psiTurk.recordUnstructuredData('pct_completion', pct);
+                    document.getElementsByTagName("BODY")[0].style.backgroundColor = 'white';
+                    document.onpointerlockchange = undefined;
+                    save();
+                }
+            );
     };
 
     var showStart = function(message){
@@ -191,6 +209,7 @@ var Mousetrack = function(rewards) {
                 startExp.style.visibility = "hidden";
             }
         });
+
         showMessage(trial, message, "black", true,
             function(){
                 console.log('Unlock removed!');
@@ -317,7 +336,7 @@ var Mousetrack = function(rewards) {
                     trial_num--;
                     trial.unlock = getCursor;
                     showMessage(trial, "Take a break. Click to continue.", "black", true, function(){
-                        trial.setup(restart);
+                        trial.setup(trialMode === "practice" ? restart : exit);
                         trial.valid = true;
                         startTrial();
                     });
@@ -546,11 +565,53 @@ var PreQ = function() {
 
 };
 
+
+var save = function(){
+    var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
+
+    prompt_resubmit = function() {
+        document.body.innerHTML = error_message;
+        $("#resubmit").click(resubmit);
+    };
+
+    print_bonus = function() {
+        if(pct >= 0.8)
+            alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
+    };
+
+    resubmit = function() {
+        document.body.innerHTML = "<h1>Trying to resubmit...</h1>";
+        reprompt = setTimeout(prompt_resubmit, 10000);
+
+        psiTurk.saveData({
+            success: function() {
+                clearInterval(reprompt);
+                psiTurk.computeBonus('compute_bonus', function(){
+                    bonus = d3.format(".2f")(bonus);
+                    print_bonus();
+                    psiTurk.completeHIT(); // when finished saving compute bonus, then quit
+                });
+            },
+            error: prompt_resubmit
+        });
+    };
+
+    psiTurk.saveData({
+        success: function () {
+            psiTurk.computeBonus('compute_bonus', function () {
+                bonus = d3.format(".2f")(bonus);
+                print_bonus();
+                psiTurk.completeHIT(); // when finished saving compute bonus, then quit
+            });
+        },
+        error: prompt_resubmit
+    });
+};
+
 var Questionnaire = function(noContext) {
 
-    document.removeEventListener(noContext);
+    document.removeEventListener('contextmenu', noContext);
 
-	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
 
 	record = function() {
         $('textarea').each(function () {
@@ -562,31 +623,6 @@ var Questionnaire = function(noContext) {
         $('select').each(function () {
             psiTurk.recordUnstructuredData(this.id, this.value);
         });
-	};
-
-	prompt_resubmit = function() {
-		document.body.innerHTML = error_message;
-		$("#resubmit").click(resubmit);
-	};
-
-	resubmit = function() {
-		document.body.innerHTML = "<h1>Trying to resubmit...</h1>";
-		reprompt = setTimeout(prompt_resubmit, 10000);
-		
-		psiTurk.saveData({
-			success: function() {
-			    clearInterval(reprompt); 
-                psiTurk.computeBonus('compute_bonus', function(){
-                    bonus = d3.format(".2f")(bonus);
-                    if(pct >= 0.8)
-                        alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
-                	else
-                	    alert("Due to exiting the experiment early, you will not receive a bonus.");
-                    psiTurk.completeHIT(); // when finished saving compute bonus, then quit
-                });
-			}, 
-			error: prompt_resubmit
-		});
 	};
 
 	// Load the questionnaire snippet 
@@ -615,16 +651,7 @@ var Questionnaire = function(noContext) {
                 next = document.getElementById("next");
                 next.onclick = function () {
                     record();
-                    psiTurk.saveData({
-                        success: function () {
-                            psiTurk.computeBonus('compute_bonus', function () {
-                                bonus = d3.format(".2f")(bonus);
-                                alert("Your bonus is $" + bonus + ", and it was collected from trials: " + reward_trials.join(', ').replace(/, ([^,]*)$/, ' and $1') + ". After verification, it will be sent within 5 working days.");
-                                psiTurk.completeHIT(); // when finished saving compute bonus, then quit
-                            });
-                        },
-                        error: prompt_resubmit
-                    });
+                    save();
                 }
             }
         }
