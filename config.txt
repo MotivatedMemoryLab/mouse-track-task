@@ -16,8 +16,8 @@ allow_repeats = true
 
 [Server Parameters]
 host = 0.0.0.0
-port = 31420
-cutoff_time = 30
+port = 31421
+cutoff_time = 120
 logfile = server.log
 loglevel = 2
 debug = true
@@ -36,4 +36,4 @@ launch_in_sandbox_mode = true
 #   https://<host>:<port>/ad 
 
 use_psiturk_ad_server = false
-ad_location = https://web-mir.ccn.duke.edu:31410/ad
+ad_location = https://web-mir.ccn.duke.edu:31411/ad
