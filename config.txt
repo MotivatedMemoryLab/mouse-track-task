@@ -10,7 +10,7 @@ ad_group = Mousetrack
 psiturk_keywords = mousetrack
 organization_name = Duke University
 browser_exclude_rule = MSIE, mobile, tablet
-allow_repeats = true
+allow_repeats = false
 
 [Database Parameters]
 
