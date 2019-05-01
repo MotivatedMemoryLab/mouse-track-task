@@ -78,7 +78,7 @@ var Mousetrack = function(rewards) {
     psiTurk.recordUnstructuredData("color-depth", window.screen.colorDepth);
 
     window.moveTo(0, 0);
-    window.resizeTo(screen.width, screen.availHeight);
+    window.resizeTo(screen.availWidth, screen.availHeight);
     let noContext = null;
     if(!mode === "debug"){
         noContext = document.addEventListener('contextmenu', function(e){

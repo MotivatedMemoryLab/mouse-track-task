@@ -1,4 +1,8 @@
 if [ -r util/dbcreds ]; then
+
+    git checkout -- config.txt
+	echo "config.txt reset."
+
 	heading='\[Database Parameters\]'
 	config="config.txt"
 	db=$(cat util/dbcreds | grep database)
@@ -17,7 +21,7 @@ if [ -r util/dbcreds ]; then
 		let port=port+1
 	done
 
-	git checkout -- config.txt
+
 
 	sed -i "s|^port = .*|port = $port|" $config
 
